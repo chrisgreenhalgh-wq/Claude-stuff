@@ -1,0 +1,27 @@
+credentials:
+  email: ""        # Your LinkedIn email
+  password: ""     # Your LinkedIn password
+
+search:
+  keywords: "software engineer"
+  location: "San Francisco Bay Area"
+  industry: ""            # e.g. "Computer Software"
+  current_company: ""     # Filter by current company name
+  job_title: ""           # Filter by job title
+  connection_degree: ""   # "1", "2", or "3+" — leave blank for all
+  max_results: 100
+
+output:
+  format: "csv"           # "csv" or "json"
+  filename: "leads"
+  directory: "./output"
+
+scraper:
+  min_delay: 2.5          # minimum seconds between actions
+  max_delay: 6.0          # maximum seconds between actions
+  page_load_wait: 4       # seconds to wait after page load
+  max_pages: 10           # maximum search result pages to scrape
+  headless: false         # set true to run without visible browser
+  proxy: ""               # optional: http://user:pass@host:port
+  save_session: true      # persist cookies between runs
+  session_file: ".session.json"
