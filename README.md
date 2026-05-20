@@ -1,4 +1,74 @@
-# LinkedIn Lead Scraper
+# Claude Stuff
+
+A collection of AI-powered productivity tools.
+
+---
+
+## YouTube Transcript Notes (`youtube_notes.py`)
+
+Converts any YouTube video into structured, detailed notes using Claude AI.
+
+**How it works:**
+1. Tries to fetch YouTube's built-in captions (fast, free)
+2. Falls back to downloading audio and transcribing with OpenAI Whisper if no captions exist
+3. Sends the transcript to Claude to produce well-organised Markdown notes
+
+### Setup
+
+```bash
+pip install -r requirements-youtube.txt
+```
+
+Set your Anthropic API key:
+
+```bash
+export ANTHROPIC_API_KEY=sk-ant-...
+```
+
+### Usage
+
+```bash
+# Basic — prints notes to terminal
+python youtube_notes.py "https://www.youtube.com/watch?v=VIDEO_ID"
+
+# Save notes to a Markdown file
+python youtube_notes.py "https://youtu.be/VIDEO_ID" -o notes.md
+
+# Force audio transcription (ignores YouTube captions)
+python youtube_notes.py "https://youtu.be/VIDEO_ID" --force-audio
+
+# Use a larger Whisper model for better accuracy on audio fallback
+python youtube_notes.py "https://youtu.be/VIDEO_ID" --force-audio --whisper-model medium
+
+# Pass API key inline
+python youtube_notes.py "https://youtu.be/VIDEO_ID" --api-key sk-ant-...
+```
+
+**Accepted URL formats:**
+- `https://www.youtube.com/watch?v=VIDEO_ID`
+- `https://youtu.be/VIDEO_ID`
+- `https://youtube.com/shorts/VIDEO_ID`
+
+### Options
+
+| Flag | Default | Description |
+|---|---|---|
+| `-o / --output PATH` | — | Save notes as a Markdown file |
+| `--whisper-model` | `base` | Whisper model size: `tiny`, `base`, `small`, `medium`, `large` |
+| `--force-audio` | off | Skip captions; transcribe audio with Whisper |
+| `--api-key` | `$ANTHROPIC_API_KEY` | Anthropic API key |
+
+### Notes format
+
+Each set of notes includes:
+- **Summary** — 2–3 sentence overview
+- **Key Topics** — headings with detailed bullets
+- **Notable Quotes / Insights** — standout lines worth remembering
+- **Key Takeaways** — concise action points or conclusions
+
+---
+
+## LinkedIn Lead Scraper (`scraper.py`)
 
 Scrapes people search results from LinkedIn and exports them to CSV or JSON.
 
@@ -8,14 +78,14 @@ Scrapes people search results from LinkedIn and exports them to CSV or JSON.
 > connections or in jurisdictions where such activity is lawful). Rate limiting
 > and human-like behaviour are built in but do not guarantee compliance.
 
-## Setup
+### Setup
 
 ```bash
 pip install -r requirements.txt
 playwright install chromium
 ```
 
-## Configuration
+### Configuration
 
 Edit `config.yaml`:
 
@@ -36,7 +106,7 @@ output:
   directory: "./output"
 ```
 
-## Usage
+### Usage
 
 ```bash
 # Basic run (browser visible, uses config.yaml)
@@ -55,7 +125,7 @@ python scraper.py --headless
 python scraper.py --no-save-session
 ```
 
-## Output fields
+### Output fields
 
 | Field | Description |
 |---|---|
@@ -71,15 +141,3 @@ python scraper.py --no-save-session
 | `phone` | Phone (`--fetch-profiles`, only if public) |
 | `website` | Website (`--fetch-profiles`, only if public) |
 | `scraped_at` | ISO-8601 timestamp |
-
-## Tips
-
-- **Session persistence**: On first run the scraper logs in and saves a cookie
-  file (`.session.json`). Subsequent runs reuse it to skip the login step.
-- **Security checkpoints**: If LinkedIn shows a CAPTCHA or email verification
-  challenge, complete it manually in the open browser window and press Enter in
-  the terminal.
-- **Proxy**: Set `scraper.proxy` in `config.yaml` to route traffic through a
-  proxy (`http://user:pass@host:port`).
-- **Rate limits**: Increase `min_delay` / `max_delay` if you see CAPTCHAs or
-  unusual-activity warnings.
