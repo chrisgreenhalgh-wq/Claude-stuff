@@ -19,6 +19,12 @@
       "skillPath": "skills/ads/SKILL.md",
       "computedHash": "2c974361b62805459d7fbd0ac8364dcbeb14f85ebd78c36f59fa32d6db23cd5e"
     },
+    "agent-browser": {
+      "source": "vercel-labs/agent-browser",
+      "sourceType": "github",
+      "skillPath": "skills/agent-browser/SKILL.md",
+      "computedHash": "edad4d958bc4baf821e3391bb9889a03a8bbc0e4d7f54ee4a5f30837654fed83"
+    },
     "ai-seo": {
       "source": "coreyhaines31/marketingskills",
       "sourceType": "github",
