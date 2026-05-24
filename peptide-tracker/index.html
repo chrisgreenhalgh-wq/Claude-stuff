@@ -1,0 +1,1215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="PepTrack" />
+  <meta name="theme-color" content="#3b82f6" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="apple-touch-icon" href="icon-192.png" />
+  <title>Peptide Tracker</title>
+  <style>
+    /* ── Reset & tokens ─────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #0f172a;
+      --surface:   #1e293b;
+      --surface2:  #273449;
+      --border:    #334155;
+      --accent:    #3b82f6;
+      --accent2:   #60a5fa;
+      --green:     #22c55e;
+      --amber:     #f59e0b;
+      --red:       #ef4444;
+      --text:      #f1f5f9;
+      --muted:     #94a3b8;
+      --radius:    14px;
+      --nav-h:     64px;
+      --safe-b:    env(safe-area-inset-bottom, 0px);
+    }
+
+    html, body {
+      height: 100%;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      overscroll-behavior: none;
+    }
+
+    /* ── Layout ─────────────────────────────────────────────── */
+    #app {
+      display: flex;
+      flex-direction: column;
+      height: 100dvh;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 18px;
+      padding-top: max(14px, env(safe-area-inset-top));
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+    }
+
+    header .logo { font-size: 1.5rem; }
+    header h1 { font-size: 1.15rem; font-weight: 700; color: var(--accent2); }
+    header small { color: var(--muted); font-size: .72rem; margin-left: auto; }
+
+    #content {
+      flex: 1;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    /* ── Bottom nav ─────────────────────────────────────────── */
+    nav {
+      display: flex;
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      padding-bottom: var(--safe-b);
+    }
+
+    nav button {
+      flex: 1;
+      border: none;
+      background: none;
+      color: var(--muted);
+      cursor: pointer;
+      padding: 10px 4px 8px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      font-size: .65rem;
+      font-weight: 600;
+      letter-spacing: .03em;
+      text-transform: uppercase;
+      transition: color .2s;
+    }
+
+    nav button .icon { font-size: 1.4rem; line-height: 1; }
+    nav button.active { color: var(--accent); }
+
+    /* ── Pages ──────────────────────────────────────────────── */
+    .page { display: none; padding: 16px; padding-bottom: 20px; }
+    .page.active { display: block; }
+
+    /* ── Cards ──────────────────────────────────────────────── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px;
+      margin-bottom: 14px;
+    }
+
+    .card-title {
+      font-size: .72rem;
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 14px;
+    }
+
+    /* ── Form elements ──────────────────────────────────────── */
+    .form-group {
+      margin-bottom: 13px;
+    }
+
+    label {
+      display: block;
+      font-size: .8rem;
+      font-weight: 600;
+      color: var(--muted);
+      margin-bottom: 5px;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      padding: 11px 13px;
+      color: var(--text);
+      font-size: 1rem;
+      font-family: inherit;
+      outline: none;
+      transition: border-color .2s;
+      -webkit-appearance: none;
+      appearance: none;
+    }
+
+    input:focus, select:focus {
+      border-color: var(--accent);
+    }
+
+    select {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2394a3b8' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 13px center;
+      padding-right: 36px;
+    }
+
+    /* ── Buttons ─────────────────────────────────────────────── */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      border: none;
+      border-radius: 10px;
+      padding: 12px 20px;
+      font-size: .95rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: opacity .15s, transform .1s;
+      width: 100%;
+    }
+
+    .btn:active { opacity: .8; transform: scale(.98); }
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-success { background: var(--green); color: #fff; }
+    .btn-danger  { background: var(--red);   color: #fff; }
+    .btn-ghost   { background: var(--surface2); color: var(--text); }
+    .btn-sm      { padding: 7px 14px; font-size: .82rem; border-radius: 8px; width: auto; }
+
+    /* ── Vial cards ─────────────────────────────────────────── */
+    .vial-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 15px;
+      margin-bottom: 12px;
+    }
+
+    .vial-card.active-vial {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 1px var(--accent);
+    }
+
+    .vial-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+
+    .vial-name {
+      font-size: 1.05rem;
+      font-weight: 700;
+    }
+
+    .vial-badge {
+      font-size: .68rem;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 20px;
+      letter-spacing: .05em;
+    }
+
+    .badge-active { background: rgba(59,130,246,.2); color: var(--accent2); }
+    .badge-low    { background: rgba(245,158,11,.2); color: var(--amber); }
+    .badge-empty  { background: rgba(239,68,68,.2);  color: var(--red); }
+    .badge-full   { background: rgba(34,197,94,.2);  color: var(--green); }
+
+    .vial-stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .stat {
+      background: var(--bg);
+      border-radius: 8px;
+      padding: 8px 10px;
+    }
+
+    .stat-label {
+      font-size: .63rem;
+      color: var(--muted);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .05em;
+    }
+
+    .stat-value {
+      font-size: .95rem;
+      font-weight: 700;
+      margin-top: 2px;
+    }
+
+    .stat-unit {
+      font-size: .7rem;
+      color: var(--muted);
+    }
+
+    /* ── Progress bar ────────────────────────────────────────── */
+    .progress-wrap {
+      margin-bottom: 12px;
+    }
+
+    .progress-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: .75rem;
+      color: var(--muted);
+      margin-bottom: 5px;
+    }
+
+    .progress-bar {
+      height: 8px;
+      background: var(--bg);
+      border-radius: 99px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      border-radius: 99px;
+      background: var(--green);
+      transition: width .4s ease;
+    }
+
+    .progress-fill.amber { background: var(--amber); }
+    .progress-fill.red   { background: var(--red);   }
+
+    .vial-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    /* ── Dose calculator ─────────────────────────────────────── */
+    .calc-result {
+      background: var(--bg);
+      border-radius: 10px;
+      padding: 14px;
+      margin-top: 14px;
+      display: none;
+    }
+
+    .calc-result.show { display: block; }
+
+    .calc-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 7px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .calc-row:last-child { border-bottom: none; }
+
+    .calc-key { font-size: .82rem; color: var(--muted); }
+
+    .calc-val {
+      font-size: 1rem;
+      font-weight: 700;
+    }
+
+    .calc-val.big {
+      font-size: 1.4rem;
+      color: var(--accent2);
+    }
+
+    /* ── Log entries ─────────────────────────────────────────── */
+    .log-entry {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 13px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .log-entry:last-child { border-bottom: none; }
+
+    .log-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--accent);
+      flex-shrink: 0;
+      margin-top: 5px;
+    }
+
+    .log-body { flex: 1; }
+
+    .log-peptide {
+      font-weight: 700;
+      font-size: .92rem;
+    }
+
+    .log-meta {
+      color: var(--muted);
+      font-size: .78rem;
+      margin-top: 2px;
+    }
+
+    .log-dose {
+      text-align: right;
+    }
+
+    .log-dose-val {
+      font-weight: 700;
+      font-size: 1rem;
+      color: var(--accent2);
+    }
+
+    .log-dose-ml {
+      font-size: .73rem;
+      color: var(--muted);
+    }
+
+    /* ── Empty state ─────────────────────────────────────────── */
+    .empty {
+      text-align: center;
+      padding: 40px 20px;
+      color: var(--muted);
+    }
+
+    .empty .emoji { font-size: 3rem; margin-bottom: 12px; }
+    .empty p { font-size: .9rem; }
+
+    /* ── Section title ───────────────────────────────────────── */
+    .section-title {
+      font-size: .72rem;
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin: 18px 0 10px;
+    }
+
+    .section-title:first-child { margin-top: 0; }
+
+    /* ── Toast ───────────────────────────────────────────────── */
+    #toast {
+      position: fixed;
+      bottom: calc(var(--nav-h) + var(--safe-b) + 12px);
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 18px;
+      font-size: .9rem;
+      font-weight: 600;
+      opacity: 0;
+      transition: opacity .25s, transform .25s;
+      pointer-events: none;
+      white-space: nowrap;
+      z-index: 999;
+    }
+
+    #toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* ── Install banner ──────────────────────────────────────── */
+    #install-banner {
+      display: none;
+      background: linear-gradient(135deg, #1d4ed8, #3b82f6);
+      padding: 12px 16px;
+      border-radius: var(--radius);
+      margin-bottom: 14px;
+      align-items: center;
+      gap: 10px;
+    }
+
+    #install-banner.show { display: flex; }
+
+    #install-banner p {
+      flex: 1;
+      font-size: .85rem;
+      font-weight: 600;
+      color: #fff;
+    }
+
+    #install-banner button {
+      background: rgba(255,255,255,.2);
+      border: 1px solid rgba(255,255,255,.3);
+      color: #fff;
+      border-radius: 8px;
+      padding: 7px 14px;
+      font-size: .8rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    /* ── Scrollbar ───────────────────────────────────────────── */
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
+
+    /* ── Modal ───────────────────────────────────────────────── */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.6);
+      z-index: 100;
+      align-items: flex-end;
+    }
+
+    .modal-overlay.open { display: flex; }
+
+    .modal {
+      background: var(--surface);
+      border-top-left-radius: 20px;
+      border-top-right-radius: 20px;
+      padding: 20px 18px;
+      padding-bottom: calc(20px + var(--safe-b));
+      width: 100%;
+      max-height: 92dvh;
+      overflow-y: auto;
+      animation: slideUp .25s ease;
+    }
+
+    @keyframes slideUp {
+      from { transform: translateY(100%); }
+      to   { transform: translateY(0); }
+    }
+
+    .modal-handle {
+      width: 40px;
+      height: 4px;
+      background: var(--border);
+      border-radius: 99px;
+      margin: 0 auto 18px;
+    }
+
+    .modal-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 18px;
+    }
+
+    /* ── Inline two-col ─────────────────────────────────────── */
+    .row-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+  </style>
+</head>
+<body>
+
+<div id="app">
+  <header>
+    <span class="logo">💉</span>
+    <h1>Peptide Tracker</h1>
+    <small id="today-date"></small>
+  </header>
+
+  <div id="content">
+    <!-- ── VIALS PAGE ─────────────────────────────────────── -->
+    <div class="page active" id="page-vials">
+      <div id="install-banner">
+        <p>📲 Add to Home Screen for quick access</p>
+        <button id="install-btn">Install</button>
+      </div>
+
+      <div id="vial-list"></div>
+
+      <button class="btn btn-primary" onclick="openAddVial()">
+        ＋ Add New Vial
+      </button>
+    </div>
+
+    <!-- ── DOSE PAGE ──────────────────────────────────────── -->
+    <div class="page" id="page-dose">
+      <div class="card">
+        <div class="card-title">Select Vial</div>
+        <div class="form-group">
+          <select id="dose-vial-select" onchange="onVialSelect()">
+            <option value="">— Choose a vial —</option>
+          </select>
+        </div>
+
+        <div id="selected-vial-info" style="display:none">
+          <div class="stat" style="margin-bottom:12px; background:var(--bg)">
+            <div class="stat-label">Concentration</div>
+            <div class="stat-value" id="conc-display">—</div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Dose Amount (mcg)</label>
+          <input type="number" id="dose-amount" placeholder="e.g. 250" min="1"
+                 oninput="calcDose()" />
+        </div>
+
+        <div class="calc-result" id="calc-result">
+          <div class="calc-row">
+            <span class="calc-key">Draw Volume</span>
+            <span class="calc-val big" id="calc-ml">— mL</span>
+          </div>
+          <div class="calc-row">
+            <span class="calc-key">Insulin Syringe (U-100)</span>
+            <span class="calc-val" id="calc-units">— units</span>
+          </div>
+          <div class="calc-row">
+            <span class="calc-key">Remaining After Dose</span>
+            <span class="calc-val" id="calc-remaining">—</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Notes (optional)</label>
+        <input type="text" id="dose-notes" placeholder="e.g. pre-workout, fasted" />
+      </div>
+
+      <button class="btn btn-success" onclick="logDose()">
+        ✓ Log This Dose
+      </button>
+    </div>
+
+    <!-- ── HISTORY PAGE ───────────────────────────────────── -->
+    <div class="page" id="page-history">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px">
+        <div>
+          <div style="font-size:1rem; font-weight:700">Dose History</div>
+          <div style="font-size:.75rem; color:var(--muted)" id="log-count">0 doses logged</div>
+        </div>
+        <button class="btn btn-ghost btn-sm" onclick="exportCSV()">Export CSV</button>
+      </div>
+
+      <div class="form-group">
+        <select id="filter-peptide" onchange="renderLog()">
+          <option value="">All peptides</option>
+        </select>
+      </div>
+
+      <div class="card">
+        <div id="log-list"></div>
+      </div>
+    </div>
+
+    <!-- ── STATS PAGE ─────────────────────────────────────── -->
+    <div class="page" id="page-stats">
+      <div class="section-title">Summary</div>
+      <div id="stats-content"></div>
+    </div>
+  </div>
+
+  <nav>
+    <button class="active" onclick="showPage('vials',this)">
+      <span class="icon">🧪</span>Vials
+    </button>
+    <button onclick="showPage('dose',this)">
+      <span class="icon">💉</span>Dose
+    </button>
+    <button onclick="showPage('history',this)">
+      <span class="icon">📋</span>History
+    </button>
+    <button onclick="showPage('stats',this)">
+      <span class="icon">📊</span>Stats
+    </button>
+  </nav>
+</div>
+
+<!-- ── ADD VIAL MODAL ─────────────────────────────────────── -->
+<div class="modal-overlay" id="add-vial-modal" onclick="closeAddVial(event)">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">🧪 Add New Vial</div>
+
+    <div class="form-group">
+      <label>Peptide Name</label>
+      <input type="text" id="v-name" placeholder="e.g. BPC-157, TB-500, CJC-1295" />
+    </div>
+
+    <div class="row-2">
+      <div class="form-group">
+        <label>Peptide Amount (mg)</label>
+        <input type="number" id="v-mg" placeholder="e.g. 5" step="0.1" min="0.1" />
+      </div>
+      <div class="form-group">
+        <label>Bac Water Added (mL)</label>
+        <input type="number" id="v-bac" placeholder="e.g. 2" step="0.1" min="0.1" />
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Reconstitution Date</label>
+      <input type="date" id="v-date" />
+    </div>
+
+    <div class="form-group">
+      <label>Notes (optional)</label>
+      <input type="text" id="v-notes" placeholder="e.g. lot #, source, storage" />
+    </div>
+
+    <!-- Live preview -->
+    <div id="vial-preview" style="display:none; background:var(--bg); border-radius:10px; padding:12px; margin-bottom:16px">
+      <div class="stat-label" style="margin-bottom:8px">Calculated Concentration</div>
+      <div style="display:flex; gap:8px">
+        <div class="stat">
+          <div class="stat-label">mcg / mL</div>
+          <div class="stat-value" id="preview-conc">—</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Total mcg</div>
+          <div class="stat-value" id="preview-total">—</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">100mcg draw</div>
+          <div class="stat-value" id="preview-draw">— mL</div>
+        </div>
+      </div>
+    </div>
+
+    <button class="btn btn-primary" onclick="saveVial()">Save Vial</button>
+  </div>
+</div>
+
+<!-- ── TOAST ──────────────────────────────────────────────── -->
+<div id="toast"></div>
+
+<script>
+// ── State ─────────────────────────────────────────────────────
+let state = {
+  vials: [],
+  log: []
+};
+
+// ── Persistence ───────────────────────────────────────────────
+function load() {
+  try {
+    const saved = localStorage.getItem('peptrack');
+    if (saved) state = JSON.parse(saved);
+  } catch(e) {}
+}
+
+function save() {
+  localStorage.setItem('peptrack', JSON.stringify(state));
+}
+
+// ── Utils ─────────────────────────────────────────────────────
+function uid() {
+  return Date.now().toString(36) + Math.random().toString(36).slice(2,6);
+}
+
+function fmt(n, d=1) {
+  return parseFloat(n.toFixed(d)).toString();
+}
+
+function toMcg(mg) { return mg * 1000; }
+
+function concOf(vial) {
+  // mcg per mL
+  return toMcg(vial.mg) / vial.bac;
+}
+
+function remainingMcg(vial) {
+  const used = state.log
+    .filter(e => e.vialId === vial.id)
+    .reduce((a, e) => a + e.doseMcg, 0);
+  return Math.max(0, toMcg(vial.mg) - used);
+}
+
+function pct(vial) {
+  return (remainingMcg(vial) / toMcg(vial.mg)) * 100;
+}
+
+function progressClass(p) {
+  if (p > 40) return '';
+  if (p > 15) return 'amber';
+  return 'red';
+}
+
+function formatDate(iso) {
+  const d = new Date(iso);
+  return d.toLocaleDateString('en-AU', { day:'numeric', month:'short', hour:'2-digit', minute:'2-digit' });
+}
+
+function daysSince(iso) {
+  const d = Math.floor((Date.now() - new Date(iso)) / 86400000);
+  return d === 0 ? 'Today' : d === 1 ? '1 day ago' : `${d} days ago`;
+}
+
+// ── Navigation ────────────────────────────────────────────────
+function showPage(name, btn) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  btn.classList.add('active');
+
+  if (name === 'dose')    renderDoseSelects();
+  if (name === 'history') renderLog();
+  if (name === 'stats')   renderStats();
+}
+
+// ── Date header ───────────────────────────────────────────────
+function setDateHeader() {
+  document.getElementById('today-date').textContent =
+    new Date().toLocaleDateString('en-AU', { weekday:'short', day:'numeric', month:'short' });
+}
+
+// ── Render vials ──────────────────────────────────────────────
+function renderVials() {
+  const el = document.getElementById('vial-list');
+  if (!state.vials.length) {
+    el.innerHTML = `
+      <div class="empty">
+        <div class="emoji">🧪</div>
+        <p>No vials yet.<br>Add your first vial below.</p>
+      </div>`;
+    return;
+  }
+
+  el.innerHTML = state.vials.map(v => {
+    const rem  = remainingMcg(v);
+    const tot  = toMcg(v.mg);
+    const p    = pct(v);
+    const conc = concOf(v);
+    const pc   = progressClass(p);
+
+    let badge = '';
+    if (rem <= 0)    badge = `<span class="vial-badge badge-empty">EMPTY</span>`;
+    else if (p < 25) badge = `<span class="vial-badge badge-low">LOW</span>`;
+    else             badge = `<span class="vial-badge badge-full">ACTIVE</span>`;
+
+    return `
+    <div class="vial-card ${rem > 0 ? 'active-vial' : ''}">
+      <div class="vial-header">
+        <div class="vial-name">${v.name}</div>
+        ${badge}
+      </div>
+      <div class="vial-stats">
+        <div class="stat">
+          <div class="stat-label">Peptide</div>
+          <div class="stat-value">${v.mg} <span class="stat-unit">mg</span></div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Bac Water</div>
+          <div class="stat-value">${v.bac} <span class="stat-unit">mL</span></div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Conc.</div>
+          <div class="stat-value">${fmt(conc,0)} <span class="stat-unit">mcg/mL</span></div>
+        </div>
+      </div>
+      <div class="progress-wrap">
+        <div class="progress-label">
+          <span>Remaining: ${fmt(rem,0)} mcg</span>
+          <span>${fmt(p,0)}%</span>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-fill ${pc}" style="width:${p}%"></div>
+        </div>
+      </div>
+      <div style="font-size:.73rem; color:var(--muted); margin-bottom:12px">
+        Reconstituted ${daysSince(v.date)} • ${v.notes || 'No notes'}
+      </div>
+      <div class="vial-actions">
+        <button class="btn btn-ghost btn-sm" onclick="setActiveVial('${v.id}')">💉 Dose</button>
+        <button class="btn btn-ghost btn-sm" onclick="deleteVial('${v.id}')">🗑 Remove</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── Add vial modal ────────────────────────────────────────────
+function openAddVial() {
+  document.getElementById('add-vial-modal').classList.add('open');
+  // Set today as default date
+  document.getElementById('v-date').value = new Date().toISOString().split('T')[0];
+  document.getElementById('v-name').focus();
+}
+
+function closeAddVial(e) {
+  if (e.target === document.getElementById('add-vial-modal')) {
+    document.getElementById('add-vial-modal').classList.remove('open');
+  }
+}
+
+// Live preview while filling form
+['v-mg', 'v-bac'].forEach(id => {
+  document.getElementById(id).addEventListener('input', updatePreview);
+});
+
+function updatePreview() {
+  const mg  = parseFloat(document.getElementById('v-mg').value);
+  const bac = parseFloat(document.getElementById('v-bac').value);
+  const prev = document.getElementById('vial-preview');
+
+  if (mg > 0 && bac > 0) {
+    const conc  = toMcg(mg) / bac;
+    const total = toMcg(mg);
+    const draw  = (100 / conc).toFixed(3);
+    document.getElementById('preview-conc').textContent  = fmt(conc, 0);
+    document.getElementById('preview-total').textContent = fmt(total, 0);
+    document.getElementById('preview-draw').textContent  = draw + ' mL';
+    prev.style.display = 'block';
+  } else {
+    prev.style.display = 'none';
+  }
+}
+
+function saveVial() {
+  const name  = document.getElementById('v-name').value.trim();
+  const mg    = parseFloat(document.getElementById('v-mg').value);
+  const bac   = parseFloat(document.getElementById('v-bac').value);
+  const date  = document.getElementById('v-date').value || new Date().toISOString().split('T')[0];
+  const notes = document.getElementById('v-notes').value.trim();
+
+  if (!name)      return toast('⚠️ Enter peptide name');
+  if (!(mg > 0))  return toast('⚠️ Enter peptide amount (mg)');
+  if (!(bac > 0)) return toast('⚠️ Enter bac water amount (mL)');
+
+  state.vials.push({ id: uid(), name, mg, bac, date, notes });
+  save();
+  renderVials();
+  renderDoseSelects();
+  updateFilterOptions();
+
+  // Reset form
+  ['v-name','v-mg','v-bac','v-notes'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('vial-preview').style.display = 'none';
+  document.getElementById('add-vial-modal').classList.remove('open');
+  toast('✅ Vial saved!');
+}
+
+function deleteVial(id) {
+  if (!confirm('Remove this vial? Dose history will be kept.')) return;
+  state.vials = state.vials.filter(v => v.id !== id);
+  save();
+  renderVials();
+  renderDoseSelects();
+  updateFilterOptions();
+  toast('🗑 Vial removed');
+}
+
+function setActiveVial(id) {
+  // Switch to dose tab with this vial pre-selected
+  document.getElementById('dose-vial-select').value = id;
+  onVialSelect();
+  document.querySelectorAll('nav button').forEach((b,i) => b.classList.toggle('active', i===1));
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-dose').classList.add('active');
+}
+
+// ── Dose calculator ────────────────────────────────────────────
+function renderDoseSelects() {
+  const sel = document.getElementById('dose-vial-select');
+  const cur = sel.value;
+  sel.innerHTML = '<option value="">— Choose a vial —</option>';
+  state.vials
+    .filter(v => remainingMcg(v) > 0)
+    .forEach(v => {
+      const o = document.createElement('option');
+      o.value = v.id;
+      o.textContent = `${v.name} (${fmt(remainingMcg(v),0)} mcg left)`;
+      sel.appendChild(o);
+    });
+  if (cur) sel.value = cur;
+  onVialSelect();
+}
+
+function onVialSelect() {
+  const id   = document.getElementById('dose-vial-select').value;
+  const info = document.getElementById('selected-vial-info');
+
+  if (!id) {
+    info.style.display = 'none';
+    document.getElementById('calc-result').classList.remove('show');
+    return;
+  }
+
+  const vial = state.vials.find(v => v.id === id);
+  if (!vial) return;
+  info.style.display = 'block';
+  const conc = concOf(vial);
+  document.getElementById('conc-display').textContent =
+    `${fmt(conc,0)} mcg/mL  •  ${vial.mg}mg in ${vial.bac}mL`;
+  calcDose();
+}
+
+function calcDose() {
+  const id   = document.getElementById('dose-vial-select').value;
+  const dose = parseFloat(document.getElementById('dose-amount').value);
+  const res  = document.getElementById('calc-result');
+
+  if (!id || !(dose > 0)) { res.classList.remove('show'); return; }
+
+  const vial  = state.vials.find(v => v.id === id);
+  if (!vial) return;
+  const conc  = concOf(vial);
+  const ml    = dose / conc;
+  const units = ml * 100; // U-100 syringe: 1mL = 100 units
+  const rem   = remainingMcg(vial) - dose;
+
+  document.getElementById('calc-ml').textContent      = ml.toFixed(3) + ' mL';
+  document.getElementById('calc-units').textContent   = fmt(units, 1) + ' units';
+  document.getElementById('calc-remaining').textContent =
+    rem >= 0 ? `${fmt(rem,0)} mcg` : '⚠️ Exceeds remaining!';
+  document.getElementById('calc-remaining').style.color =
+    rem >= 0 ? '' : 'var(--red)';
+
+  res.classList.add('show');
+}
+
+function logDose() {
+  const id    = document.getElementById('dose-vial-select').value;
+  const dose  = parseFloat(document.getElementById('dose-amount').value);
+  const notes = document.getElementById('dose-notes').value.trim();
+
+  if (!id)         return toast('⚠️ Select a vial');
+  if (!(dose > 0)) return toast('⚠️ Enter dose amount');
+
+  const vial = state.vials.find(v => v.id === id);
+  if (!vial) return;
+
+  const rem = remainingMcg(vial) - dose;
+  if (rem < 0) return toast('⚠️ Dose exceeds remaining peptide!');
+
+  const conc  = concOf(vial);
+  const ml    = dose / conc;
+  const units = ml * 100;
+
+  state.log.unshift({
+    id: uid(),
+    vialId: id,
+    peptide: vial.name,
+    doseMcg: dose,
+    doseML: ml,
+    units,
+    notes,
+    ts: new Date().toISOString()
+  });
+
+  save();
+  renderVials();
+  renderDoseSelects();
+  updateFilterOptions();
+
+  // Reset
+  document.getElementById('dose-amount').value = '';
+  document.getElementById('dose-notes').value  = '';
+  document.getElementById('calc-result').classList.remove('show');
+
+  toast(`✅ ${dose} mcg logged (${ml.toFixed(2)} mL)`);
+}
+
+// ── History ─────────────────────────────────────────────────────
+function updateFilterOptions() {
+  const sel = document.getElementById('filter-peptide');
+  const cur = sel.value;
+  const names = [...new Set(state.log.map(e => e.peptide))].sort();
+  sel.innerHTML = '<option value="">All peptides</option>';
+  names.forEach(n => {
+    const o = document.createElement('option');
+    o.value = n; o.textContent = n; sel.appendChild(o);
+  });
+  if (cur) sel.value = cur;
+}
+
+function renderLog() {
+  const filter = document.getElementById('filter-peptide').value;
+  const entries = filter ? state.log.filter(e => e.peptide === filter) : state.log;
+
+  document.getElementById('log-count').textContent =
+    `${entries.length} dose${entries.length !== 1 ? 's' : ''} logged`;
+
+  const el = document.getElementById('log-list');
+  if (!entries.length) {
+    el.innerHTML = `
+      <div class="empty">
+        <div class="emoji">📋</div>
+        <p>No doses logged yet.</p>
+      </div>`;
+    return;
+  }
+
+  // Group by date
+  const groups = {};
+  entries.forEach(e => {
+    const day = new Date(e.ts).toLocaleDateString('en-AU', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+    if (!groups[day]) groups[day] = [];
+    groups[day].push(e);
+  });
+
+  el.innerHTML = Object.entries(groups).map(([day, items]) => `
+    <div style="font-size:.72rem; font-weight:700; color:var(--muted); text-transform:uppercase;
+                letter-spacing:.05em; padding: 8px 0 4px; border-bottom:1px solid var(--border); margin-bottom:4px">
+      ${day}
+    </div>
+    ${items.map(e => `
+      <div class="log-entry">
+        <div class="log-dot"></div>
+        <div class="log-body">
+          <div class="log-peptide">${e.peptide}</div>
+          <div class="log-meta">
+            ${new Date(e.ts).toLocaleTimeString('en-AU', {hour:'2-digit',minute:'2-digit'})}
+            ${e.notes ? ' · ' + e.notes : ''}
+          </div>
+        </div>
+        <div class="log-dose">
+          <div class="log-dose-val">${fmt(e.doseMcg,0)} mcg</div>
+          <div class="log-dose-ml">${e.doseML.toFixed(2)} mL · ${fmt(e.units,1)} u</div>
+        </div>
+      </div>
+    `).join('')}
+  `).join('');
+}
+
+// ── Stats ─────────────────────────────────────────────────────
+function renderStats() {
+  const el = document.getElementById('stats-content');
+  if (!state.log.length) {
+    el.innerHTML = `
+      <div class="empty">
+        <div class="emoji">📊</div>
+        <p>Log some doses to see stats.</p>
+      </div>`;
+    return;
+  }
+
+  const byPeptide = {};
+  state.log.forEach(e => {
+    if (!byPeptide[e.peptide]) byPeptide[e.peptide] = { count:0, total:0 };
+    byPeptide[e.peptide].count++;
+    byPeptide[e.peptide].total += e.doseMcg;
+  });
+
+  const today = new Date().toDateString();
+  const todayDoses = state.log.filter(e => new Date(e.ts).toDateString() === today);
+  const week = Date.now() - 7*86400000;
+  const weekDoses = state.log.filter(e => new Date(e.ts) >= week);
+
+  el.innerHTML = `
+    <div class="card">
+      <div class="card-title">Overview</div>
+      <div class="vial-stats">
+        <div class="stat">
+          <div class="stat-label">Total Doses</div>
+          <div class="stat-value">${state.log.length}</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Today</div>
+          <div class="stat-value">${todayDoses.length}</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">This Week</div>
+          <div class="stat-value">${weekDoses.length}</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-title">By Peptide</div>
+    ${Object.entries(byPeptide).map(([name, d]) => `
+      <div class="card" style="margin-bottom:10px">
+        <div style="display:flex; justify-content:space-between; align-items:center">
+          <div>
+            <div style="font-weight:700">${name}</div>
+            <div style="font-size:.78rem; color:var(--muted); margin-top:2px">${d.count} dose${d.count!==1?'s':''}</div>
+          </div>
+          <div style="text-align:right">
+            <div style="font-weight:700; color:var(--accent2)">${fmt(d.total,0)} mcg</div>
+            <div style="font-size:.75rem; color:var(--muted)">total delivered</div>
+          </div>
+        </div>
+      </div>
+    `).join('')}
+
+    <div class="section-title">Active Vials</div>
+    ${state.vials.map(v => {
+      const rem = remainingMcg(v);
+      const p   = pct(v);
+      const pc  = progressClass(p);
+      return `
+      <div class="card" style="margin-bottom:10px">
+        <div style="font-weight:700; margin-bottom:8px">${v.name}</div>
+        <div class="progress-wrap">
+          <div class="progress-label">
+            <span>${fmt(rem,0)} mcg remaining</span>
+            <span>${fmt(p,0)}%</span>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-fill ${pc}" style="width:${p}%"></div>
+          </div>
+        </div>
+        <div style="font-size:.75rem; color:var(--muted)">
+          ${fmt(concOf(v),0)} mcg/mL concentration
+        </div>
+      </div>`;
+    }).join('')}
+  `;
+}
+
+// ── CSV Export ─────────────────────────────────────────────────
+function exportCSV() {
+  const rows = [['Date','Time','Peptide','Dose (mcg)','Volume (mL)','Units','Notes']];
+  state.log.forEach(e => {
+    const d = new Date(e.ts);
+    rows.push([
+      d.toLocaleDateString('en-AU'),
+      d.toLocaleTimeString('en-AU', {hour:'2-digit', minute:'2-digit'}),
+      e.peptide,
+      fmt(e.doseMcg, 2),
+      e.doseML.toFixed(3),
+      fmt(e.units, 2),
+      e.notes || ''
+    ]);
+  });
+  const csv  = rows.map(r => r.map(c => `"${c}"`).join(',')).join('\n');
+  const blob = new Blob([csv], {type:'text/csv'});
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href     = url;
+  a.download = `peptide-log-${new Date().toISOString().split('T')[0]}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+  toast('📄 CSV exported');
+}
+
+// ── Toast ──────────────────────────────────────────────────────
+function toast(msg, ms=2400) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), ms);
+}
+
+// ── PWA install ────────────────────────────────────────────────
+let installEvent = null;
+
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  installEvent = e;
+  const banner = document.getElementById('install-banner');
+  banner.classList.add('show');
+});
+
+document.getElementById('install-btn').addEventListener('click', () => {
+  if (installEvent) {
+    installEvent.prompt();
+    installEvent.userChoice.then(() => {
+      installEvent = null;
+      document.getElementById('install-banner').classList.remove('show');
+    });
+  }
+});
+
+// ── Service worker ─────────────────────────────────────────────
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./sw.js').catch(() => {});
+}
+
+// ── Init ───────────────────────────────────────────────────────
+load();
+setDateHeader();
+renderVials();
+updateFilterOptions();
+</script>
+</body>
+</html>
