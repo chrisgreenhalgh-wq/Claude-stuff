@@ -15,20 +15,21 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --bg:        #0f172a;
-      --surface:   #1e293b;
-      --surface2:  #273449;
-      --border:    #334155;
-      --accent:    #3b82f6;
-      --accent2:   #60a5fa;
-      --green:     #22c55e;
-      --amber:     #f59e0b;
-      --red:       #ef4444;
-      --text:      #f1f5f9;
-      --muted:     #94a3b8;
-      --radius:    14px;
-      --nav-h:     64px;
-      --safe-b:    env(safe-area-inset-bottom, 0px);
+      --bg:       #0f172a;
+      --surface:  #1e293b;
+      --surface2: #273449;
+      --border:   #334155;
+      --accent:   #3b82f6;
+      --accent2:  #60a5fa;
+      --green:    #22c55e;
+      --amber:    #f59e0b;
+      --red:      #ef4444;
+      --purple:   #a78bfa;
+      --text:     #f1f5f9;
+      --muted:    #94a3b8;
+      --radius:   14px;
+      --nav-h:    64px;
+      --safe-b:   env(safe-area-inset-bottom, 0px);
     }
 
     html, body {
@@ -39,32 +40,40 @@
       overscroll-behavior: none;
     }
 
-    /* ── Layout ─────────────────────────────────────────────── */
-    #app {
-      display: flex;
-      flex-direction: column;
-      height: 100dvh;
-    }
+    /* ── App shell ──────────────────────────────────────────── */
+    #app { display: flex; flex-direction: column; height: 100dvh; }
 
     header {
       display: flex;
       align-items: center;
       gap: 10px;
-      padding: 14px 18px;
+      padding: 14px 16px;
       padding-top: max(14px, env(safe-area-inset-top));
       background: var(--surface);
       border-bottom: 1px solid var(--border);
     }
 
-    header .logo { font-size: 1.5rem; }
-    header h1 { font-size: 1.15rem; font-weight: 700; color: var(--accent2); }
-    header small { color: var(--muted); font-size: .72rem; margin-left: auto; }
+    header .logo { font-size: 1.45rem; }
+    header h1 { font-size: 1.1rem; font-weight: 700; color: var(--accent2); }
 
-    #content {
-      flex: 1;
-      overflow-y: auto;
-      -webkit-overflow-scrolling: touch;
+    /* Notification bell */
+    .notif-btn {
+      background: none;
+      border: none;
+      font-size: 1.15rem;
+      cursor: pointer;
+      padding: 4px 6px;
+      border-radius: 8px;
+      opacity: .5;
+      transition: opacity .2s, background .2s;
+      line-height: 1;
     }
+    .notif-btn:hover { background: var(--surface2); }
+    .notif-btn.on    { opacity: 1; }
+
+    header small { color: var(--muted); font-size: .7rem; margin-left: auto; }
+
+    #content { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; }
 
     /* ── Bottom nav ─────────────────────────────────────────── */
     nav {
@@ -73,30 +82,18 @@
       border-top: 1px solid var(--border);
       padding-bottom: var(--safe-b);
     }
-
     nav button {
-      flex: 1;
-      border: none;
-      background: none;
-      color: var(--muted);
-      cursor: pointer;
-      padding: 10px 4px 8px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 3px;
-      font-size: .65rem;
-      font-weight: 600;
-      letter-spacing: .03em;
-      text-transform: uppercase;
-      transition: color .2s;
+      flex: 1; border: none; background: none; color: var(--muted);
+      cursor: pointer; padding: 10px 4px 8px;
+      display: flex; flex-direction: column; align-items: center; gap: 3px;
+      font-size: .62rem; font-weight: 600; letter-spacing: .03em;
+      text-transform: uppercase; transition: color .2s;
     }
-
-    nav button .icon { font-size: 1.4rem; line-height: 1; }
+    nav button .icon { font-size: 1.35rem; line-height: 1; }
     nav button.active { color: var(--accent); }
 
     /* ── Pages ──────────────────────────────────────────────── */
-    .page { display: none; padding: 16px; padding-bottom: 20px; }
+    .page { display: none; padding: 14px; padding-bottom: 20px; }
     .page.active { display: block; }
 
     /* ── Cards ──────────────────────────────────────────────── */
@@ -104,426 +101,309 @@
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: var(--radius);
-      padding: 16px;
-      margin-bottom: 14px;
+      padding: 14px;
+      margin-bottom: 12px;
+    }
+    .card-title {
+      font-size: .68rem; font-weight: 700; letter-spacing: .09em;
+      text-transform: uppercase; color: var(--muted); margin-bottom: 12px;
     }
 
-    .card-title {
-      font-size: .72rem;
-      font-weight: 700;
-      letter-spacing: .08em;
-      text-transform: uppercase;
-      color: var(--muted);
-      margin-bottom: 14px;
+    /* ── Graph / gauge section ──────────────────────────────── */
+    .graph-section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px 12px 10px;
+      margin-bottom: 12px;
     }
+    .graph-title {
+      font-size: .66rem; font-weight: 700; letter-spacing: .1em;
+      text-transform: uppercase; color: var(--muted); margin-bottom: 10px;
+    }
+    .gauge-row {
+      display: flex; gap: 8px;
+      overflow-x: auto; -webkit-overflow-scrolling: touch;
+      padding-bottom: 2px; scrollbar-width: none;
+    }
+    .gauge-row::-webkit-scrollbar { display: none; }
+    .gauge-card {
+      flex-shrink: 0; display: flex; flex-direction: column; align-items: center;
+      background: var(--bg); border-radius: 12px; padding: 10px 8px;
+      cursor: pointer; min-width: 90px; transition: opacity .15s;
+    }
+    .gauge-card:active { opacity: .7; }
+    .gauge-name {
+      font-size: .72rem; font-weight: 700; text-align: center; margin-top: 4px;
+      max-width: 88px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+    .gauge-days { font-size: .68rem; font-weight: 700; color: var(--muted); margin-top: 2px; }
+    .gauge-days.urgent { color: var(--red); }
+    .gauge-days.warn   { color: var(--amber); }
+    .gauge-end { font-size: .62rem; color: var(--muted); margin-top: 1px; }
 
     /* ── Form elements ──────────────────────────────────────── */
-    .form-group {
-      margin-bottom: 13px;
-    }
-
-    label {
-      display: block;
-      font-size: .8rem;
-      font-weight: 600;
-      color: var(--muted);
-      margin-bottom: 5px;
-    }
-
+    .form-group { margin-bottom: 12px; }
+    label { display: block; font-size: .78rem; font-weight: 600; color: var(--muted); margin-bottom: 5px; }
     input, select, textarea {
-      width: 100%;
-      background: var(--bg);
-      border: 1px solid var(--border);
-      border-radius: 9px;
-      padding: 11px 13px;
-      color: var(--text);
-      font-size: 1rem;
-      font-family: inherit;
-      outline: none;
-      transition: border-color .2s;
-      -webkit-appearance: none;
-      appearance: none;
+      width: 100%; background: var(--bg); border: 1px solid var(--border);
+      border-radius: 9px; padding: 11px 13px; color: var(--text);
+      font-size: 1rem; font-family: inherit; outline: none;
+      transition: border-color .2s; -webkit-appearance: none; appearance: none;
     }
-
-    input:focus, select:focus {
-      border-color: var(--accent);
-    }
-
+    input:focus, select:focus { border-color: var(--accent); }
     select {
       background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2394a3b8' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
-      background-repeat: no-repeat;
-      background-position: right 13px center;
-      padding-right: 36px;
+      background-repeat: no-repeat; background-position: right 13px center; padding-right: 36px;
     }
 
     /* ── Buttons ─────────────────────────────────────────────── */
     .btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-      border: none;
-      border-radius: 10px;
-      padding: 12px 20px;
-      font-size: .95rem;
-      font-weight: 700;
-      cursor: pointer;
-      transition: opacity .15s, transform .1s;
-      width: 100%;
+      display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+      border: none; border-radius: 10px; padding: 12px 20px;
+      font-size: .92rem; font-weight: 700; cursor: pointer;
+      transition: opacity .15s, transform .1s; width: 100%;
     }
-
     .btn:active { opacity: .8; transform: scale(.98); }
     .btn-primary { background: var(--accent); color: #fff; }
-    .btn-success { background: var(--green); color: #fff; }
-    .btn-danger  { background: var(--red);   color: #fff; }
+    .btn-success { background: var(--green);  color: #fff; }
+    .btn-amber   { background: var(--amber);  color: #000; }
+    .btn-danger  { background: var(--red);    color: #fff; }
     .btn-ghost   { background: var(--surface2); color: var(--text); }
-    .btn-sm      { padding: 7px 14px; font-size: .82rem; border-radius: 8px; width: auto; }
+    .btn-sm      { padding: 7px 12px; font-size: .78rem; border-radius: 8px; width: auto; }
 
     /* ── Vial cards ─────────────────────────────────────────── */
     .vial-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 15px;
-      margin-bottom: 12px;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 14px; margin-bottom: 10px;
     }
-
-    .vial-card.active-vial {
-      border-color: var(--accent);
-      box-shadow: 0 0 0 1px var(--accent);
-    }
+    .vial-card.active-vial { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+    .vial-card.urgent-vial { border-color: var(--red);    box-shadow: 0 0 0 1px var(--red); }
+    .vial-card.warn-vial   { border-color: var(--amber);  box-shadow: 0 0 0 1px var(--amber); }
 
     .vial-header {
-      display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
-      margin-bottom: 10px;
+      display: flex; align-items: flex-start;
+      justify-content: space-between; margin-bottom: 10px;
     }
-
-    .vial-name {
-      font-size: 1.05rem;
-      font-weight: 700;
-    }
-
+    .vial-name { font-size: 1rem; font-weight: 700; }
     .vial-badge {
-      font-size: .68rem;
-      font-weight: 700;
-      padding: 3px 8px;
-      border-radius: 20px;
-      letter-spacing: .05em;
+      font-size: .65rem; font-weight: 700;
+      padding: 3px 8px; border-radius: 20px; letter-spacing: .05em; white-space: nowrap;
     }
-
-    .badge-active { background: rgba(59,130,246,.2); color: var(--accent2); }
-    .badge-low    { background: rgba(245,158,11,.2); color: var(--amber); }
-    .badge-empty  { background: rgba(239,68,68,.2);  color: var(--red); }
-    .badge-full   { background: rgba(34,197,94,.2);  color: var(--green); }
+    .badge-active { background: rgba(59,130,246,.2);  color: var(--accent2); }
+    .badge-low    { background: rgba(245,158,11,.2);  color: var(--amber); }
+    .badge-urgent { background: rgba(239,68,68,.2);   color: var(--red); }
+    .badge-empty  { background: rgba(239,68,68,.15);  color: var(--red); }
+    .badge-done   { background: rgba(148,163,184,.1); color: var(--muted); }
 
     .vial-stats {
-      display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
-      gap: 8px;
-      margin-bottom: 12px;
+      display: grid; grid-template-columns: 1fr 1fr 1fr;
+      gap: 7px; margin-bottom: 10px;
     }
-
-    .stat {
-      background: var(--bg);
-      border-radius: 8px;
-      padding: 8px 10px;
-    }
-
+    .stat { background: var(--bg); border-radius: 8px; padding: 8px 9px; }
     .stat-label {
-      font-size: .63rem;
-      color: var(--muted);
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: .05em;
+      font-size: .6rem; color: var(--muted); font-weight: 600;
+      text-transform: uppercase; letter-spacing: .05em;
     }
+    .stat-value { font-size: .9rem; font-weight: 700; margin-top: 2px; }
+    .stat-unit  { font-size: .67rem; color: var(--muted); }
 
-    .stat-value {
-      font-size: .95rem;
-      font-weight: 700;
-      margin-top: 2px;
+    /* Schedule forecast row */
+    .sched-row {
+      display: flex; justify-content: space-between; align-items: center;
+      font-size: .75rem; background: var(--bg);
+      border-radius: 8px; padding: 8px 10px; margin-bottom: 10px; gap: 6px;
     }
+    .sched-left { color: var(--muted); }
+    .sched-right { font-weight: 700; white-space: nowrap; }
+    .sched-right.urgent { color: var(--red); }
+    .sched-right.warn   { color: var(--amber); }
+    .sched-right.ok     { color: var(--green); }
 
-    .stat-unit {
-      font-size: .7rem;
-      color: var(--muted);
-    }
-
-    /* ── Progress bar ────────────────────────────────────────── */
-    .progress-wrap {
-      margin-bottom: 12px;
-    }
-
+    /* Progress bar */
+    .progress-wrap { margin-bottom: 10px; }
     .progress-label {
-      display: flex;
-      justify-content: space-between;
-      font-size: .75rem;
-      color: var(--muted);
-      margin-bottom: 5px;
+      display: flex; justify-content: space-between;
+      font-size: .73rem; color: var(--muted); margin-bottom: 5px;
     }
-
-    .progress-bar {
-      height: 8px;
-      background: var(--bg);
-      border-radius: 99px;
-      overflow: hidden;
-    }
-
+    .progress-bar { height: 7px; background: var(--bg); border-radius: 99px; overflow: hidden; }
     .progress-fill {
-      height: 100%;
-      border-radius: 99px;
-      background: var(--green);
-      transition: width .4s ease;
+      height: 100%; border-radius: 99px; background: var(--green); transition: width .4s ease;
     }
-
     .progress-fill.amber { background: var(--amber); }
-    .progress-fill.red   { background: var(--red);   }
+    .progress-fill.red   { background: var(--red); }
 
-    .vial-actions {
-      display: flex;
-      gap: 8px;
+    .vial-meta { font-size: .72rem; color: var(--muted); margin-bottom: 10px; }
+    .vial-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+
+    /* ── Expired section ────────────────────────────────────── */
+    .expired-toggle {
+      width: 100%; background: none; border: 1px dashed var(--border);
+      border-radius: 10px; padding: 11px 16px; color: var(--muted);
+      font-size: .83rem; font-weight: 600; cursor: pointer;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .expired-toggle:active { opacity: .7; }
+    .exp-arrow { font-size: .75rem; transition: transform .2s; }
+    .exp-arrow.open { transform: rotate(90deg); }
+    .expired-vial-card {
+      opacity: .65; border-style: dashed !important;
+      box-shadow: none !important;
     }
 
     /* ── Dose calculator ─────────────────────────────────────── */
     .calc-result {
-      background: var(--bg);
-      border-radius: 10px;
-      padding: 14px;
-      margin-top: 14px;
-      display: none;
+      background: var(--bg); border-radius: 10px; padding: 13px; margin-top: 12px; display: none;
     }
-
     .calc-result.show { display: block; }
-
     .calc-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 7px 0;
-      border-bottom: 1px solid var(--border);
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 7px 0; border-bottom: 1px solid var(--border);
     }
-
     .calc-row:last-child { border-bottom: none; }
-
-    .calc-key { font-size: .82rem; color: var(--muted); }
-
-    .calc-val {
-      font-size: 1rem;
-      font-weight: 700;
-    }
-
-    .calc-val.big {
-      font-size: 1.4rem;
-      color: var(--accent2);
-    }
+    .calc-key { font-size: .8rem; color: var(--muted); }
+    .calc-val { font-size: .95rem; font-weight: 700; }
+    .calc-val.big { font-size: 1.35rem; color: var(--accent2); }
 
     /* ── Log entries ─────────────────────────────────────────── */
     .log-entry {
-      display: flex;
-      align-items: flex-start;
-      gap: 12px;
-      padding: 13px 0;
-      border-bottom: 1px solid var(--border);
+      display: flex; align-items: flex-start; gap: 12px;
+      padding: 12px 0; border-bottom: 1px solid var(--border);
     }
-
     .log-entry:last-child { border-bottom: none; }
-
     .log-dot {
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      background: var(--accent);
-      flex-shrink: 0;
-      margin-top: 5px;
+      width: 9px; height: 9px; border-radius: 50%;
+      background: var(--accent); flex-shrink: 0; margin-top: 5px;
     }
-
     .log-body { flex: 1; }
-
-    .log-peptide {
-      font-weight: 700;
-      font-size: .92rem;
-    }
-
-    .log-meta {
-      color: var(--muted);
-      font-size: .78rem;
-      margin-top: 2px;
-    }
-
-    .log-dose {
-      text-align: right;
-    }
-
-    .log-dose-val {
-      font-weight: 700;
-      font-size: 1rem;
-      color: var(--accent2);
-    }
-
-    .log-dose-ml {
-      font-size: .73rem;
-      color: var(--muted);
-    }
+    .log-peptide { font-weight: 700; font-size: .9rem; }
+    .log-meta    { color: var(--muted); font-size: .76rem; margin-top: 2px; }
+    .log-dose    { text-align: right; }
+    .log-dose-val { font-weight: 700; font-size: .95rem; color: var(--accent2); }
+    .log-dose-ml  { font-size: .7rem; color: var(--muted); }
 
     /* ── Empty state ─────────────────────────────────────────── */
-    .empty {
-      text-align: center;
-      padding: 40px 20px;
-      color: var(--muted);
-    }
+    .empty { text-align: center; padding: 36px 20px; color: var(--muted); }
+    .empty .emoji { font-size: 2.8rem; margin-bottom: 10px; }
+    .empty p { font-size: .88rem; }
 
-    .empty .emoji { font-size: 3rem; margin-bottom: 12px; }
-    .empty p { font-size: .9rem; }
-
-    /* ── Section title ───────────────────────────────────────── */
+    /* ── Section heading ─────────────────────────────────────── */
     .section-title {
-      font-size: .72rem;
-      font-weight: 700;
-      letter-spacing: .08em;
-      text-transform: uppercase;
-      color: var(--muted);
-      margin: 18px 0 10px;
+      font-size: .68rem; font-weight: 700; letter-spacing: .09em;
+      text-transform: uppercase; color: var(--muted); margin: 16px 0 8px;
     }
-
     .section-title:first-child { margin-top: 0; }
 
     /* ── Toast ───────────────────────────────────────────────── */
     #toast {
       position: fixed;
-      bottom: calc(var(--nav-h) + var(--safe-b) + 12px);
-      left: 50%;
-      transform: translateX(-50%) translateY(20px);
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 10px 18px;
-      font-size: .9rem;
-      font-weight: 600;
-      opacity: 0;
-      transition: opacity .25s, transform .25s;
-      pointer-events: none;
-      white-space: nowrap;
-      z-index: 999;
+      bottom: calc(var(--nav-h) + var(--safe-b) + 10px);
+      left: 50%; transform: translateX(-50%) translateY(20px);
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 10px; padding: 9px 16px;
+      font-size: .88rem; font-weight: 600;
+      opacity: 0; transition: opacity .25s, transform .25s;
+      pointer-events: none; white-space: nowrap; z-index: 999;
     }
-
-    #toast.show {
-      opacity: 1;
-      transform: translateX(-50%) translateY(0);
-    }
+    #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
     /* ── Install banner ──────────────────────────────────────── */
     #install-banner {
       display: none;
       background: linear-gradient(135deg, #1d4ed8, #3b82f6);
-      padding: 12px 16px;
-      border-radius: var(--radius);
-      margin-bottom: 14px;
-      align-items: center;
-      gap: 10px;
+      padding: 11px 14px; border-radius: var(--radius); margin-bottom: 12px;
+      align-items: center; gap: 10px;
     }
-
     #install-banner.show { display: flex; }
-
-    #install-banner p {
-      flex: 1;
-      font-size: .85rem;
-      font-weight: 600;
-      color: #fff;
-    }
-
+    #install-banner p { flex: 1; font-size: .83rem; font-weight: 600; color: #fff; }
     #install-banner button {
-      background: rgba(255,255,255,.2);
-      border: 1px solid rgba(255,255,255,.3);
-      color: #fff;
-      border-radius: 8px;
-      padding: 7px 14px;
-      font-size: .8rem;
-      font-weight: 700;
-      cursor: pointer;
+      background: rgba(255,255,255,.2); border: 1px solid rgba(255,255,255,.3);
+      color: #fff; border-radius: 8px; padding: 6px 13px;
+      font-size: .78rem; font-weight: 700; cursor: pointer;
     }
-
-    /* ── Scrollbar ───────────────────────────────────────────── */
-    ::-webkit-scrollbar { width: 4px; }
-    ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
 
     /* ── Modal ───────────────────────────────────────────────── */
     .modal-overlay {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,.6);
-      z-index: 100;
-      align-items: flex-end;
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,.65); z-index: 100; align-items: flex-end;
     }
-
     .modal-overlay.open { display: flex; }
-
     .modal {
-      background: var(--surface);
-      border-top-left-radius: 20px;
-      border-top-right-radius: 20px;
-      padding: 20px 18px;
-      padding-bottom: calc(20px + var(--safe-b));
-      width: 100%;
-      max-height: 92dvh;
-      overflow-y: auto;
+      background: var(--surface); border-top-left-radius: 22px;
+      border-top-right-radius: 22px; padding: 18px 16px;
+      padding-bottom: calc(18px + var(--safe-b));
+      width: 100%; max-height: 94dvh; overflow-y: auto;
       animation: slideUp .25s ease;
     }
-
     @keyframes slideUp {
       from { transform: translateY(100%); }
       to   { transform: translateY(0); }
     }
-
     .modal-handle {
-      width: 40px;
-      height: 4px;
-      background: var(--border);
-      border-radius: 99px;
-      margin: 0 auto 18px;
+      width: 38px; height: 4px; background: var(--border);
+      border-radius: 99px; margin: 0 auto 16px;
     }
+    .modal-title { font-size: 1.05rem; font-weight: 700; margin-bottom: 16px; }
 
-    .modal-title {
-      font-size: 1.1rem;
-      font-weight: 700;
-      margin-bottom: 18px;
-    }
+    /* ── Grid helpers ────────────────────────────────────────── */
+    .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; }
 
-    /* ── Inline two-col ─────────────────────────────────────── */
-    .row-2 {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-    }
+    /* ── Scrollbar ───────────────────────────────────────────── */
+    ::-webkit-scrollbar { width: 3px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
   </style>
 </head>
 <body>
 
 <div id="app">
+  <!-- ── HEADER ───────────────────────────────────────────── -->
   <header>
     <span class="logo">💉</span>
     <h1>Peptide Tracker</h1>
+    <button id="notif-btn" class="notif-btn" onclick="handleNotifBtn()" title="Enable reminders">🔕</button>
     <small id="today-date"></small>
   </header>
 
   <div id="content">
-    <!-- ── VIALS PAGE ─────────────────────────────────────── -->
+
+    <!-- ═══════════════════════════════════════════════════════
+         VIALS PAGE
+    ════════════════════════════════════════════════════════ -->
     <div class="page active" id="page-vials">
+
+      <!-- Install banner -->
       <div id="install-banner">
         <p>📲 Add to Home Screen for quick access</p>
         <button id="install-btn">Install</button>
       </div>
 
+      <!-- ── Graph / gauges ───────────────────────────────── -->
+      <div class="graph-section" id="graph-section" style="display:none">
+        <div class="graph-title">Active Peptides Overview</div>
+        <div class="gauge-row" id="gauge-row"></div>
+      </div>
+
+      <!-- ── Active vials ─────────────────────────────────── -->
       <div id="vial-list"></div>
 
-      <button class="btn btn-primary" onclick="openAddVial()">
+      <button class="btn btn-primary" onclick="openAddVial()" style="margin-bottom:14px">
         ＋ Add New Vial
       </button>
+
+      <!-- ── Expired section ──────────────────────────────── -->
+      <div id="expired-section" style="display:none">
+        <button class="expired-toggle" onclick="toggleExpired()">
+          <span class="exp-arrow" id="exp-arrow">▶</span>
+          <span id="expired-label">Expired / Archived Vials</span>
+        </button>
+        <div id="expired-list" style="display:none; margin-top:10px"></div>
+      </div>
     </div>
 
-    <!-- ── DOSE PAGE ──────────────────────────────────────── -->
+    <!-- ═══════════════════════════════════════════════════════
+         DOSE PAGE
+    ════════════════════════════════════════════════════════ -->
     <div class="page" id="page-dose">
       <div class="card">
         <div class="card-title">Select Vial</div>
@@ -542,8 +422,7 @@
 
         <div class="form-group">
           <label>Dose Amount (mcg)</label>
-          <input type="number" id="dose-amount" placeholder="e.g. 250" min="1"
-                 oninput="calcDose()" />
+          <input type="number" id="dose-amount" placeholder="e.g. 250" min="1" oninput="calcDose()" />
         </div>
 
         <div class="calc-result" id="calc-result">
@@ -567,17 +446,17 @@
         <input type="text" id="dose-notes" placeholder="e.g. pre-workout, fasted" />
       </div>
 
-      <button class="btn btn-success" onclick="logDose()">
-        ✓ Log This Dose
-      </button>
+      <button class="btn btn-success" onclick="logDose()">✓ Log This Dose</button>
     </div>
 
-    <!-- ── HISTORY PAGE ───────────────────────────────────── -->
+    <!-- ═══════════════════════════════════════════════════════
+         HISTORY PAGE
+    ════════════════════════════════════════════════════════ -->
     <div class="page" id="page-history">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px">
         <div>
-          <div style="font-size:1rem; font-weight:700">Dose History</div>
-          <div style="font-size:.75rem; color:var(--muted)" id="log-count">0 doses logged</div>
+          <div style="font-size:.97rem; font-weight:700">Dose History</div>
+          <div style="font-size:.73rem; color:var(--muted)" id="log-count">0 doses logged</div>
         </div>
         <button class="btn btn-ghost btn-sm" onclick="exportCSV()">Export CSV</button>
       </div>
@@ -593,13 +472,16 @@
       </div>
     </div>
 
-    <!-- ── STATS PAGE ─────────────────────────────────────── -->
+    <!-- ═══════════════════════════════════════════════════════
+         STATS PAGE
+    ════════════════════════════════════════════════════════ -->
     <div class="page" id="page-stats">
-      <div class="section-title">Summary</div>
       <div id="stats-content"></div>
     </div>
-  </div>
 
+  </div><!-- end #content -->
+
+  <!-- ── Bottom nav ─────────────────────────────────────────── -->
   <nav>
     <button class="active" onclick="showPage('vials',this)">
       <span class="icon">🧪</span>Vials
@@ -616,17 +498,21 @@
   </nav>
 </div>
 
-<!-- ── ADD VIAL MODAL ─────────────────────────────────────── -->
-<div class="modal-overlay" id="add-vial-modal" onclick="closeAddVial(event)">
+<!-- ═══════════════════════════════════════════════════════════
+     ADD VIAL MODAL
+════════════════════════════════════════════════════════════ -->
+<div class="modal-overlay" id="add-vial-modal" onclick="closeAddVialOverlay(event)">
   <div class="modal">
     <div class="modal-handle"></div>
     <div class="modal-title">🧪 Add New Vial</div>
 
+    <!-- Peptide name -->
     <div class="form-group">
       <label>Peptide Name</label>
       <input type="text" id="v-name" placeholder="e.g. BPC-157, TB-500, CJC-1295" />
     </div>
 
+    <!-- Amount + water -->
     <div class="row-2">
       <div class="form-group">
         <label>Peptide Amount (mg)</label>
@@ -638,20 +524,49 @@
       </div>
     </div>
 
-    <div class="form-group">
-      <label>Reconstitution Date</label>
-      <input type="date" id="v-date" />
+    <!-- Dose schedule (NEW) -->
+    <div class="row-2">
+      <div class="form-group">
+        <label>Dose per Injection (mcg)</label>
+        <input type="number" id="v-dose" placeholder="e.g. 250" step="1" min="1" />
+      </div>
+      <div class="form-group">
+        <label>Injections per Week</label>
+        <select id="v-freq">
+          <option value="">— optional —</option>
+          <option value="1">1× per week</option>
+          <option value="2">2× per week</option>
+          <option value="3">3× per week</option>
+          <option value="4">4× per week</option>
+          <option value="5">5× per week</option>
+          <option value="6">6× per week</option>
+          <option value="7">Daily (7×)</option>
+        </select>
+      </div>
     </div>
 
+    <!-- Dates -->
+    <div class="row-2">
+      <div class="form-group">
+        <label>Start Date</label>
+        <input type="date" id="v-start" />
+      </div>
+      <div class="form-group">
+        <label>Reconstitution Date</label>
+        <input type="date" id="v-date" />
+      </div>
+    </div>
+
+    <!-- Notes -->
     <div class="form-group">
       <label>Notes (optional)</label>
       <input type="text" id="v-notes" placeholder="e.g. lot #, source, storage" />
     </div>
 
     <!-- Live preview -->
-    <div id="vial-preview" style="display:none; background:var(--bg); border-radius:10px; padding:12px; margin-bottom:16px">
-      <div class="stat-label" style="margin-bottom:8px">Calculated Concentration</div>
-      <div style="display:flex; gap:8px">
+    <div id="vial-preview" style="display:none; background:var(--bg); border-radius:11px; padding:12px; margin-bottom:14px">
+      <div class="stat-label" style="margin-bottom:8px">Calculated Preview</div>
+      <div style="display:flex; gap:7px; margin-bottom:8px">
         <div class="stat">
           <div class="stat-label">mcg / mL</div>
           <div class="stat-value" id="preview-conc">—</div>
@@ -662,7 +577,25 @@
         </div>
         <div class="stat">
           <div class="stat-label">100mcg draw</div>
-          <div class="stat-value" id="preview-draw">— mL</div>
+          <div class="stat-value" id="preview-draw" style="font-size:.78rem">—</div>
+        </div>
+      </div>
+      <!-- Schedule forecast (shown only when dose + freq filled) -->
+      <div id="preview-sched" style="display:none; border-top:1px solid var(--border); padding-top:8px">
+        <div class="stat-label" style="margin-bottom:6px">Supply Forecast</div>
+        <div style="display:flex; gap:7px">
+          <div class="stat">
+            <div class="stat-label">Total doses</div>
+            <div class="stat-value" id="prev-doses">—</div>
+          </div>
+          <div class="stat">
+            <div class="stat-label">Duration</div>
+            <div class="stat-value" id="prev-weeks">—</div>
+          </div>
+          <div class="stat">
+            <div class="stat-label">Est. end</div>
+            <div class="stat-value" id="prev-end" style="font-size:.75rem">—</div>
+          </div>
         </div>
       </div>
     </div>
@@ -671,21 +604,28 @@
   </div>
 </div>
 
-<!-- ── TOAST ──────────────────────────────────────────────── -->
+<!-- Toast -->
 <div id="toast"></div>
 
 <script>
-// ── State ─────────────────────────────────────────────────────
-let state = {
-  vials: [],
-  log: []
-};
+/* ════════════════════════════════════════════════════════════
+   STATE & PERSISTENCE
+════════════════════════════════════════════════════════════ */
+let state = { vials: [], log: [] };
 
-// ── Persistence ───────────────────────────────────────────────
 function load() {
   try {
-    const saved = localStorage.getItem('peptrack');
-    if (saved) state = JSON.parse(saved);
+    const s = localStorage.getItem('peptrack');
+    if (s) state = JSON.parse(s);
+    // migrate old vials without new fields
+    state.vials.forEach(v => {
+      if (v.expired === undefined)            v.expired            = false;
+      if (v.expiredDate === undefined)        v.expiredDate        = null;
+      if (v.dosePerInjection === undefined)   v.dosePerInjection   = null;
+      if (v.injectionsPerWeek === undefined)  v.injectionsPerWeek  = null;
+      if (v.startDate === undefined)          v.startDate          = v.date;
+      if (v.lastNotifiedDate === undefined)   v.lastNotifiedDate   = null;
+    });
   } catch(e) {}
 }
 
@@ -693,32 +633,20 @@ function save() {
   localStorage.setItem('peptrack', JSON.stringify(state));
 }
 
-// ── Utils ─────────────────────────────────────────────────────
-function uid() {
-  return Date.now().toString(36) + Math.random().toString(36).slice(2,6);
-}
-
-function fmt(n, d=1) {
-  return parseFloat(n.toFixed(d)).toString();
-}
-
+/* ════════════════════════════════════════════════════════════
+   UTILITY
+════════════════════════════════════════════════════════════ */
+function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2,5); }
+function fmt(n, d=1) { return parseFloat(n.toFixed(d)).toString(); }
 function toMcg(mg) { return mg * 1000; }
+function concOf(v) { return toMcg(v.mg) / v.bac; }
 
-function concOf(vial) {
-  // mcg per mL
-  return toMcg(vial.mg) / vial.bac;
+function remainingMcg(v) {
+  const used = state.log.filter(e => e.vialId === v.id).reduce((a,e) => a + e.doseMcg, 0);
+  return Math.max(0, toMcg(v.mg) - used);
 }
 
-function remainingMcg(vial) {
-  const used = state.log
-    .filter(e => e.vialId === vial.id)
-    .reduce((a, e) => a + e.doseMcg, 0);
-  return Math.max(0, toMcg(vial.mg) - used);
-}
-
-function pct(vial) {
-  return (remainingMcg(vial) / toMcg(vial.mg)) * 100;
-}
+function pct(v) { return (remainingMcg(v) / toMcg(v.mg)) * 100; }
 
 function progressClass(p) {
   if (p > 40) return '';
@@ -726,130 +654,327 @@ function progressClass(p) {
   return 'red';
 }
 
-function formatDate(iso) {
-  const d = new Date(iso);
-  return d.toLocaleDateString('en-AU', { day:'numeric', month:'short', hour:'2-digit', minute:'2-digit' });
+/* Forecast: how many days of supply remain at the scheduled rate */
+function getDaysRemaining(v) {
+  if (!v.dosePerInjection || !v.injectionsPerWeek) return null;
+  const rem = remainingMcg(v);
+  if (rem <= 0) return 0;
+  const dosesLeft = rem / v.dosePerInjection;
+  return Math.round((dosesLeft / v.injectionsPerWeek) * 7);
+}
+
+function getEndDate(v) {
+  const days = getDaysRemaining(v);
+  if (days === null) return null;
+  const d = new Date();
+  d.setDate(d.getDate() + days);
+  return d;
 }
 
 function daysSince(iso) {
   const d = Math.floor((Date.now() - new Date(iso)) / 86400000);
-  return d === 0 ? 'Today' : d === 1 ? '1 day ago' : `${d} days ago`;
+  return d === 0 ? 'today' : d === 1 ? '1 day ago' : `${d}d ago`;
 }
 
-// ── Navigation ────────────────────────────────────────────────
+function fmtDate(iso, opts) {
+  return new Date(iso).toLocaleDateString('en-AU', opts || { day:'numeric', month:'short', year:'numeric' });
+}
+
+/* ════════════════════════════════════════════════════════════
+   NAVIGATION
+════════════════════════════════════════════════════════════ */
 function showPage(name, btn) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
   document.getElementById('page-' + name).classList.add('active');
   btn.classList.add('active');
-
   if (name === 'dose')    renderDoseSelects();
   if (name === 'history') renderLog();
   if (name === 'stats')   renderStats();
 }
 
-// ── Date header ───────────────────────────────────────────────
 function setDateHeader() {
   document.getElementById('today-date').textContent =
     new Date().toLocaleDateString('en-AU', { weekday:'short', day:'numeric', month:'short' });
 }
 
-// ── Render vials ──────────────────────────────────────────────
+/* ════════════════════════════════════════════════════════════
+   GRAPH / GAUGES
+════════════════════════════════════════════════════════════ */
+function renderGraph() {
+  const active = state.vials.filter(v => !v.expired && remainingMcg(v) > 0);
+  const section = document.getElementById('graph-section');
+
+  if (!active.length) { section.style.display = 'none'; return; }
+  section.style.display = 'block';
+
+  const R = 34, CX = 44, CY = 44, SW = 7;
+  const CIRC = 2 * Math.PI * R;
+
+  document.getElementById('gauge-row').innerHTML = active.map(v => {
+    const p      = pct(v);
+    const offset = CIRC * (1 - p / 100);
+    const color  = p > 40 ? '#22c55e' : p > 15 ? '#f59e0b' : '#ef4444';
+    const days   = getDaysRemaining(v);
+    const end    = getEndDate(v);
+
+    let daysHtml = '';
+    if (days === null) {
+      daysHtml = `<div class="gauge-days" style="color:var(--border)">No schedule</div>`;
+    } else if (days <= 0) {
+      daysHtml = `<div class="gauge-days urgent">⚠️ Depleted</div>`;
+    } else if (days <= 7) {
+      daysHtml = `<div class="gauge-days urgent">~${days}d left</div>
+                  ${end ? `<div class="gauge-end">${fmtDate(end, {day:'numeric',month:'short'})}</div>` : ''}`;
+    } else if (days <= 14) {
+      daysHtml = `<div class="gauge-days warn">~${days}d left</div>
+                  ${end ? `<div class="gauge-end">${fmtDate(end, {day:'numeric',month:'short'})}</div>` : ''}`;
+    } else {
+      daysHtml = `<div class="gauge-days">~${days}d left</div>
+                  ${end ? `<div class="gauge-end">${fmtDate(end, {day:'numeric',month:'short'})}</div>` : ''}`;
+    }
+
+    return `
+      <div class="gauge-card" onclick="setActiveVial('${v.id}')">
+        <svg width="88" height="88" viewBox="0 0 88 88">
+          <circle cx="${CX}" cy="${CY}" r="${R}" fill="none" stroke="var(--border)" stroke-width="${SW}"/>
+          <circle cx="${CX}" cy="${CY}" r="${R}" fill="none" stroke="${color}" stroke-width="${SW}"
+                  stroke-dasharray="${CIRC.toFixed(2)}" stroke-dashoffset="${offset.toFixed(2)}"
+                  stroke-linecap="round" transform="rotate(-90 ${CX} ${CY})"/>
+          <text x="${CX}" y="${CY - 5}" text-anchor="middle" fill="${color}"
+                font-size="14" font-weight="bold" font-family="-apple-system,sans-serif">${Math.round(p)}%</text>
+          <text x="${CX}" y="${CY + 9}" text-anchor="middle" fill="#94a3b8"
+                font-size="9" font-family="-apple-system,sans-serif">left</text>
+        </svg>
+        <div class="gauge-name">${v.name}</div>
+        ${daysHtml}
+      </div>`;
+  }).join('');
+}
+
+/* ════════════════════════════════════════════════════════════
+   VIAL RENDERING
+════════════════════════════════════════════════════════════ */
 function renderVials() {
+  const active = state.vials.filter(v => !v.expired);
   const el = document.getElementById('vial-list');
-  if (!state.vials.length) {
+
+  if (!active.length) {
     el.innerHTML = `
       <div class="empty">
         <div class="emoji">🧪</div>
-        <p>No vials yet.<br>Add your first vial below.</p>
+        <p>No active vials.<br>Tap <strong>Add New Vial</strong> to get started.</p>
       </div>`;
-    return;
+  } else {
+    el.innerHTML = active.map(vialCardHTML).join('');
   }
 
-  el.innerHTML = state.vials.map(v => {
-    const rem  = remainingMcg(v);
-    const tot  = toMcg(v.mg);
-    const p    = pct(v);
-    const conc = concOf(v);
-    const pc   = progressClass(p);
+  renderGraph();
+  renderExpired();
+}
 
-    let badge = '';
-    if (rem <= 0)    badge = `<span class="vial-badge badge-empty">EMPTY</span>`;
-    else if (p < 25) badge = `<span class="vial-badge badge-low">LOW</span>`;
-    else             badge = `<span class="vial-badge badge-full">ACTIVE</span>`;
+function vialCardHTML(v) {
+  const rem  = remainingMcg(v);
+  const p    = pct(v);
+  const conc = concOf(v);
+  const pc   = progressClass(p);
+  const days = getDaysRemaining(v);
+  const end  = getEndDate(v);
+
+  // Card border class
+  let cardClass = 'vial-card';
+  if (rem > 0) {
+    if (days !== null && days <= 7)       cardClass += ' urgent-vial';
+    else if (days !== null && days <= 14) cardClass += ' warn-vial';
+    else                                  cardClass += ' active-vial';
+  }
+
+  // Badge
+  let badge = '';
+  if (rem <= 0)             badge = `<span class="vial-badge badge-empty">EMPTY</span>`;
+  else if (days !== null && days <= 7)  badge = `<span class="vial-badge badge-urgent">⚠️ LOW</span>`;
+  else if (p < 25)          badge = `<span class="vial-badge badge-low">LOW</span>`;
+  else                      badge = `<span class="vial-badge badge-active">ACTIVE</span>`;
+
+  // Schedule row
+  let schedHTML = '';
+  if (v.dosePerInjection && v.injectionsPerWeek) {
+    let endClass = 'ok';
+    let endText  = 'No schedule';
+    if (end) {
+      const label = fmtDate(end, {day:'numeric',month:'short'});
+      if (days <= 0)       { endClass = 'urgent'; endText = '⚠️ Depleted'; }
+      else if (days <= 7)  { endClass = 'urgent'; endText = `⚠️ ${label} (~${days}d)`; }
+      else if (days <= 14) { endClass = 'warn';   endText = `${label} (~${days}d)`; }
+      else                 { endClass = 'ok';     endText = `${label} (~${days}d)`; }
+    }
+    schedHTML = `
+      <div class="sched-row">
+        <span class="sched-left">📅 ${v.injectionsPerWeek}×/wk · ${fmt(v.dosePerInjection,0)} mcg/dose</span>
+        <span class="sched-right ${endClass}">${endText}</span>
+      </div>`;
+  }
+
+  const started = v.startDate || v.date;
+
+  return `
+  <div class="${cardClass}">
+    <div class="vial-header">
+      <div class="vial-name">${v.name}</div>
+      ${badge}
+    </div>
+    <div class="vial-stats">
+      <div class="stat">
+        <div class="stat-label">Peptide</div>
+        <div class="stat-value">${v.mg}<span class="stat-unit"> mg</span></div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Bac Water</div>
+        <div class="stat-value">${v.bac}<span class="stat-unit"> mL</span></div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Conc.</div>
+        <div class="stat-value">${fmt(conc,0)}<span class="stat-unit"> mcg/mL</span></div>
+      </div>
+    </div>
+    ${schedHTML}
+    <div class="progress-wrap">
+      <div class="progress-label">
+        <span>Remaining: ${fmt(rem,0)} mcg</span>
+        <span>${fmt(p,0)}%</span>
+      </div>
+      <div class="progress-bar">
+        <div class="progress-fill ${pc}" style="width:${Math.min(p,100)}%"></div>
+      </div>
+    </div>
+    <div class="vial-meta">
+      Started ${daysSince(started)}${v.notes ? ' · ' + v.notes : ''}
+    </div>
+    <div class="vial-actions">
+      <button class="btn btn-ghost btn-sm" onclick="setActiveVial('${v.id}')">💉 Dose</button>
+      <button class="btn btn-ghost btn-sm" onclick="expireVial('${v.id}')" style="color:var(--amber)">✓ Expire</button>
+      <button class="btn btn-ghost btn-sm" onclick="deleteVial('${v.id}')" style="color:var(--red)">🗑</button>
+    </div>
+  </div>`;
+}
+
+/* ════════════════════════════════════════════════════════════
+   EXPIRED SECTION
+════════════════════════════════════════════════════════════ */
+let expiredOpen = false;
+
+function toggleExpired() {
+  expiredOpen = !expiredOpen;
+  document.getElementById('expired-list').style.display = expiredOpen ? 'block' : 'none';
+  const arrow = document.getElementById('exp-arrow');
+  arrow.classList.toggle('open', expiredOpen);
+}
+
+function renderExpired() {
+  const expired = state.vials.filter(v => v.expired);
+  const section = document.getElementById('expired-section');
+  if (!expired.length) { section.style.display = 'none'; return; }
+
+  section.style.display = 'block';
+  document.getElementById('expired-label').textContent = `Expired / Archived (${expired.length})`;
+
+  document.getElementById('expired-list').innerHTML = expired.map(v => {
+    const logs      = state.log.filter(e => e.vialId === v.id);
+    const totalUsed = logs.reduce((a,e) => a + e.doseMcg, 0);
+    const usedPct   = Math.round(totalUsed / toMcg(v.mg) * 100);
+    const started   = v.startDate || v.date;
 
     return `
-    <div class="vial-card ${rem > 0 ? 'active-vial' : ''}">
+    <div class="vial-card expired-vial-card">
       <div class="vial-header">
-        <div class="vial-name">${v.name}</div>
-        ${badge}
+        <div class="vial-name" style="color:var(--muted)">${v.name}</div>
+        <span class="vial-badge badge-done">ARCHIVED</span>
       </div>
-      <div class="vial-stats">
-        <div class="stat">
-          <div class="stat-label">Peptide</div>
-          <div class="stat-value">${v.mg} <span class="stat-unit">mg</span></div>
-        </div>
-        <div class="stat">
-          <div class="stat-label">Bac Water</div>
-          <div class="stat-value">${v.bac} <span class="stat-unit">mL</span></div>
-        </div>
-        <div class="stat">
-          <div class="stat-label">Conc.</div>
-          <div class="stat-value">${fmt(conc,0)} <span class="stat-unit">mcg/mL</span></div>
-        </div>
+      <div style="font-size:.76rem; color:var(--muted); margin-bottom:6px">
+        ${v.mg}mg · ${v.bac}mL bac water · ${fmt(concOf(v),0)} mcg/mL
       </div>
-      <div class="progress-wrap">
-        <div class="progress-label">
-          <span>Remaining: ${fmt(rem,0)} mcg</span>
-          <span>${fmt(p,0)}%</span>
-        </div>
-        <div class="progress-bar">
-          <div class="progress-fill ${pc}" style="width:${p}%"></div>
-        </div>
+      <div style="font-size:.76rem; color:var(--muted); margin-bottom:6px">
+        📅 ${fmtDate(started, {day:'numeric',month:'short',year:'numeric'})}
+        → ${v.expiredDate ? fmtDate(v.expiredDate, {day:'numeric',month:'short',year:'numeric'}) : '—'}
       </div>
-      <div style="font-size:.73rem; color:var(--muted); margin-bottom:12px">
-        Reconstituted ${daysSince(v.date)} • ${v.notes || 'No notes'}
+      <div style="font-size:.76rem; color:var(--muted); margin-bottom:10px">
+        ${logs.length} dose${logs.length!==1?'s':''} logged · ${fmt(totalUsed,0)} mcg used (${usedPct}% of vial)
       </div>
-      <div class="vial-actions">
-        <button class="btn btn-ghost btn-sm" onclick="setActiveVial('${v.id}')">💉 Dose</button>
-        <button class="btn btn-ghost btn-sm" onclick="deleteVial('${v.id}')">🗑 Remove</button>
-      </div>
+      <button class="btn btn-ghost btn-sm" onclick="deleteVial('${v.id}')" style="color:var(--red)">
+        🗑 Delete Record
+      </button>
     </div>`;
   }).join('');
 }
 
-// ── Add vial modal ────────────────────────────────────────────
-function openAddVial() {
-  document.getElementById('add-vial-modal').classList.add('open');
-  // Set today as default date
-  document.getElementById('v-date').value = new Date().toISOString().split('T')[0];
-  document.getElementById('v-name').focus();
+function expireVial(id) {
+  const v = state.vials.find(x => x.id === id);
+  if (!v) return;
+  if (!confirm(`Archive "${v.name}"?\n\nThis marks it as expired and moves it to the archived section. Dose history is kept.`)) return;
+  v.expired     = true;
+  v.expiredDate = new Date().toISOString();
+  save();
+  renderVials();
+  renderDoseSelects();
+  toast('✓ Vial archived');
 }
 
-function closeAddVial(e) {
+/* ════════════════════════════════════════════════════════════
+   ADD VIAL MODAL
+════════════════════════════════════════════════════════════ */
+function openAddVial() {
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('v-date').value  = today;
+  document.getElementById('v-start').value = today;
+  document.getElementById('add-vial-modal').classList.add('open');
+  setTimeout(() => document.getElementById('v-name').focus(), 300);
+}
+
+function closeAddVialOverlay(e) {
   if (e.target === document.getElementById('add-vial-modal')) {
     document.getElementById('add-vial-modal').classList.remove('open');
   }
 }
 
-// Live preview while filling form
-['v-mg', 'v-bac'].forEach(id => {
-  document.getElementById(id).addEventListener('input', updatePreview);
-});
+// Attach preview listeners after DOM is ready
+function attachPreviewListeners() {
+  ['v-mg','v-bac','v-dose','v-freq','v-start'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('input', updatePreview);
+  });
+}
 
 function updatePreview() {
-  const mg  = parseFloat(document.getElementById('v-mg').value);
-  const bac = parseFloat(document.getElementById('v-bac').value);
-  const prev = document.getElementById('vial-preview');
+  const mg    = parseFloat(document.getElementById('v-mg').value);
+  const bac   = parseFloat(document.getElementById('v-bac').value);
+  const dose  = parseFloat(document.getElementById('v-dose').value);
+  const freq  = parseInt(document.getElementById('v-freq').value);
+  const start = document.getElementById('v-start').value;
+  const prev  = document.getElementById('vial-preview');
+  const sched = document.getElementById('preview-sched');
 
   if (mg > 0 && bac > 0) {
     const conc  = toMcg(mg) / bac;
     const total = toMcg(mg);
-    const draw  = (100 / conc).toFixed(3);
     document.getElementById('preview-conc').textContent  = fmt(conc, 0);
     document.getElementById('preview-total').textContent = fmt(total, 0);
-    document.getElementById('preview-draw').textContent  = draw + ' mL';
+    document.getElementById('preview-draw').textContent  = (100 / conc).toFixed(3) + ' mL';
     prev.style.display = 'block';
+
+    if (dose > 0 && freq > 0) {
+      const totalDoses = total / dose;
+      const totalDays  = (totalDoses / freq) * 7;
+      const startDate  = start ? new Date(start + 'T00:00:00') : new Date();
+      const endDate    = new Date(startDate);
+      endDate.setDate(endDate.getDate() + Math.round(totalDays));
+
+      document.getElementById('prev-doses').textContent = Math.floor(totalDoses);
+      document.getElementById('prev-weeks').textContent = fmt(totalDays / 7, 1) + ' wks';
+      document.getElementById('prev-end').textContent   = fmtDate(endDate, {day:'numeric',month:'short',year:'2-digit'});
+      sched.style.display = 'block';
+    } else {
+      sched.style.display = 'none';
+    }
   } else {
     prev.style.display = 'none';
   }
@@ -859,38 +984,62 @@ function saveVial() {
   const name  = document.getElementById('v-name').value.trim();
   const mg    = parseFloat(document.getElementById('v-mg').value);
   const bac   = parseFloat(document.getElementById('v-bac').value);
-  const date  = document.getElementById('v-date').value || new Date().toISOString().split('T')[0];
+  const date  = document.getElementById('v-date').value  || new Date().toISOString().split('T')[0];
+  const start = document.getElementById('v-start').value || date;
   const notes = document.getElementById('v-notes').value.trim();
+  const dpi   = parseFloat(document.getElementById('v-dose').value) || null;
+  const ipw   = parseInt(document.getElementById('v-freq').value)   || null;
 
-  if (!name)      return toast('⚠️ Enter peptide name');
-  if (!(mg > 0))  return toast('⚠️ Enter peptide amount (mg)');
-  if (!(bac > 0)) return toast('⚠️ Enter bac water amount (mL)');
+  if (!name)     return toast('⚠️ Enter a peptide name');
+  if (!(mg > 0)) return toast('⚠️ Enter peptide amount (mg)');
+  if (!(bac > 0))return toast('⚠️ Enter bac water amount (mL)');
 
-  state.vials.push({ id: uid(), name, mg, bac, date, notes });
+  const vial = {
+    id: uid(), name, mg, bac, date, startDate: start, notes,
+    dosePerInjection: dpi, injectionsPerWeek: ipw,
+    expired: false, expiredDate: null, lastNotifiedDate: null
+  };
+  state.vials.push(vial);
   save();
   renderVials();
   renderDoseSelects();
   updateFilterOptions();
 
   // Reset form
-  ['v-name','v-mg','v-bac','v-notes'].forEach(id => document.getElementById(id).value = '');
+  ['v-name','v-mg','v-bac','v-notes','v-dose'].forEach(id =>
+    document.getElementById(id).value = '');
+  document.getElementById('v-freq').value = '';
   document.getElementById('vial-preview').style.display = 'none';
   document.getElementById('add-vial-modal').classList.remove('open');
   toast('✅ Vial saved!');
+
+  // Prompt for notifications if schedule was set and permission not yet granted
+  if (dpi && ipw && 'Notification' in window && Notification.permission === 'default') {
+    setTimeout(() => {
+      if (confirm('Enable reminder notifications?\n\nYou\'ll get a notification ~1 week before this vial runs out.')) {
+        Notification.requestPermission().then(p => {
+          if (p === 'granted') { updateNotifBtn(); checkNotifications(); toast('🔔 Notifications enabled!'); }
+        });
+      }
+    }, 600);
+  }
 }
 
 function deleteVial(id) {
-  if (!confirm('Remove this vial? Dose history will be kept.')) return;
-  state.vials = state.vials.filter(v => v.id !== id);
+  const v = state.vials.find(x => x.id === id);
+  const name = v ? v.name : 'this vial';
+  if (!confirm(`Permanently delete "${name}"?\n\nAll dose history for this vial will also be removed.`)) return;
+  state.log   = state.log.filter(e => e.vialId !== id);
+  state.vials = state.vials.filter(x => x.id !== id);
   save();
   renderVials();
   renderDoseSelects();
   updateFilterOptions();
-  toast('🗑 Vial removed');
+  toast('🗑 Vial deleted');
 }
 
 function setActiveVial(id) {
-  // Switch to dose tab with this vial pre-selected
+  renderDoseSelects();
   document.getElementById('dose-vial-select').value = id;
   onVialSelect();
   document.querySelectorAll('nav button').forEach((b,i) => b.classList.toggle('active', i===1));
@@ -898,13 +1047,15 @@ function setActiveVial(id) {
   document.getElementById('page-dose').classList.add('active');
 }
 
-// ── Dose calculator ────────────────────────────────────────────
+/* ════════════════════════════════════════════════════════════
+   DOSE CALCULATOR
+════════════════════════════════════════════════════════════ */
 function renderDoseSelects() {
   const sel = document.getElementById('dose-vial-select');
   const cur = sel.value;
   sel.innerHTML = '<option value="">— Choose a vial —</option>';
   state.vials
-    .filter(v => remainingMcg(v) > 0)
+    .filter(v => !v.expired && remainingMcg(v) > 0)
     .forEach(v => {
       const o = document.createElement('option');
       o.value = v.id;
@@ -918,19 +1069,18 @@ function renderDoseSelects() {
 function onVialSelect() {
   const id   = document.getElementById('dose-vial-select').value;
   const info = document.getElementById('selected-vial-info');
-
-  if (!id) {
-    info.style.display = 'none';
-    document.getElementById('calc-result').classList.remove('show');
-    return;
-  }
-
-  const vial = state.vials.find(v => v.id === id);
-  if (!vial) return;
+  if (!id) { info.style.display = 'none'; document.getElementById('calc-result').classList.remove('show'); return; }
+  const v = state.vials.find(x => x.id === id);
+  if (!v) return;
   info.style.display = 'block';
-  const conc = concOf(vial);
   document.getElementById('conc-display').textContent =
-    `${fmt(conc,0)} mcg/mL  •  ${vial.mg}mg in ${vial.bac}mL`;
+    `${fmt(concOf(v),0)} mcg/mL  ·  ${v.mg}mg in ${v.bac}mL`;
+
+  // Pre-fill dose from vial schedule if set
+  const doseEl = document.getElementById('dose-amount');
+  if (v.dosePerInjection && !doseEl.value) {
+    doseEl.value = v.dosePerInjection;
+  }
   calcDose();
 }
 
@@ -938,23 +1088,19 @@ function calcDose() {
   const id   = document.getElementById('dose-vial-select').value;
   const dose = parseFloat(document.getElementById('dose-amount').value);
   const res  = document.getElementById('calc-result');
-
   if (!id || !(dose > 0)) { res.classList.remove('show'); return; }
-
-  const vial  = state.vials.find(v => v.id === id);
-  if (!vial) return;
-  const conc  = concOf(vial);
+  const v    = state.vials.find(x => x.id === id);
+  if (!v) return;
+  const conc  = concOf(v);
   const ml    = dose / conc;
-  const units = ml * 100; // U-100 syringe: 1mL = 100 units
-  const rem   = remainingMcg(vial) - dose;
+  const units = ml * 100;
+  const rem   = remainingMcg(v) - dose;
 
   document.getElementById('calc-ml').textContent      = ml.toFixed(3) + ' mL';
   document.getElementById('calc-units').textContent   = fmt(units, 1) + ' units';
   document.getElementById('calc-remaining').textContent =
     rem >= 0 ? `${fmt(rem,0)} mcg` : '⚠️ Exceeds remaining!';
-  document.getElementById('calc-remaining').style.color =
-    rem >= 0 ? '' : 'var(--red)';
-
+  document.getElementById('calc-remaining').style.color = rem >= 0 ? '' : 'var(--red)';
   res.classList.add('show');
 }
 
@@ -962,45 +1108,36 @@ function logDose() {
   const id    = document.getElementById('dose-vial-select').value;
   const dose  = parseFloat(document.getElementById('dose-amount').value);
   const notes = document.getElementById('dose-notes').value.trim();
-
   if (!id)         return toast('⚠️ Select a vial');
   if (!(dose > 0)) return toast('⚠️ Enter dose amount');
+  const v = state.vials.find(x => x.id === id);
+  if (!v) return;
+  if (remainingMcg(v) - dose < 0) return toast('⚠️ Dose exceeds remaining peptide!');
 
-  const vial = state.vials.find(v => v.id === id);
-  if (!vial) return;
-
-  const rem = remainingMcg(vial) - dose;
-  if (rem < 0) return toast('⚠️ Dose exceeds remaining peptide!');
-
-  const conc  = concOf(vial);
+  const conc  = concOf(v);
   const ml    = dose / conc;
   const units = ml * 100;
 
-  state.log.unshift({
-    id: uid(),
-    vialId: id,
-    peptide: vial.name,
-    doseMcg: dose,
-    doseML: ml,
-    units,
-    notes,
-    ts: new Date().toISOString()
-  });
-
+  state.log.unshift({ id: uid(), vialId: id, peptide: v.name, doseMcg: dose,
+    doseML: ml, units, notes, ts: new Date().toISOString() });
   save();
   renderVials();
   renderDoseSelects();
   updateFilterOptions();
 
-  // Reset
   document.getElementById('dose-amount').value = '';
   document.getElementById('dose-notes').value  = '';
   document.getElementById('calc-result').classList.remove('show');
+  document.getElementById('selected-vial-info').style.display = 'none';
+  toast(`✅ ${dose} mcg logged  ·  ${ml.toFixed(2)} mL`);
 
-  toast(`✅ ${dose} mcg logged (${ml.toFixed(2)} mL)`);
+  // Re-check notifications (supply may now be within 7 days)
+  checkNotifications();
 }
 
-// ── History ─────────────────────────────────────────────────────
+/* ════════════════════════════════════════════════════════════
+   HISTORY
+════════════════════════════════════════════════════════════ */
 function updateFilterOptions() {
   const sel = document.getElementById('filter-peptide');
   const cur = sel.value;
@@ -1014,23 +1151,17 @@ function updateFilterOptions() {
 }
 
 function renderLog() {
-  const filter = document.getElementById('filter-peptide').value;
+  const filter  = document.getElementById('filter-peptide').value;
   const entries = filter ? state.log.filter(e => e.peptide === filter) : state.log;
-
   document.getElementById('log-count').textContent =
     `${entries.length} dose${entries.length !== 1 ? 's' : ''} logged`;
 
   const el = document.getElementById('log-list');
   if (!entries.length) {
-    el.innerHTML = `
-      <div class="empty">
-        <div class="emoji">📋</div>
-        <p>No doses logged yet.</p>
-      </div>`;
+    el.innerHTML = `<div class="empty"><div class="emoji">📋</div><p>No doses logged yet.</p></div>`;
     return;
   }
 
-  // Group by date
   const groups = {};
   entries.forEach(e => {
     const day = new Date(e.ts).toLocaleDateString('en-AU', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
@@ -1039,8 +1170,8 @@ function renderLog() {
   });
 
   el.innerHTML = Object.entries(groups).map(([day, items]) => `
-    <div style="font-size:.72rem; font-weight:700; color:var(--muted); text-transform:uppercase;
-                letter-spacing:.05em; padding: 8px 0 4px; border-bottom:1px solid var(--border); margin-bottom:4px">
+    <div style="font-size:.68rem; font-weight:700; color:var(--muted); text-transform:uppercase;
+                letter-spacing:.06em; padding:8px 0 4px; border-bottom:1px solid var(--border); margin-bottom:4px">
       ${day}
     </div>
     ${items.map(e => `
@@ -1049,7 +1180,7 @@ function renderLog() {
         <div class="log-body">
           <div class="log-peptide">${e.peptide}</div>
           <div class="log-meta">
-            ${new Date(e.ts).toLocaleTimeString('en-AU', {hour:'2-digit',minute:'2-digit'})}
+            ${new Date(e.ts).toLocaleTimeString('en-AU',{hour:'2-digit',minute:'2-digit'})}
             ${e.notes ? ' · ' + e.notes : ''}
           </div>
         </div>
@@ -1057,20 +1188,17 @@ function renderLog() {
           <div class="log-dose-val">${fmt(e.doseMcg,0)} mcg</div>
           <div class="log-dose-ml">${e.doseML.toFixed(2)} mL · ${fmt(e.units,1)} u</div>
         </div>
-      </div>
-    `).join('')}
+      </div>`).join('')}
   `).join('');
 }
 
-// ── Stats ─────────────────────────────────────────────────────
+/* ════════════════════════════════════════════════════════════
+   STATS
+════════════════════════════════════════════════════════════ */
 function renderStats() {
   const el = document.getElementById('stats-content');
-  if (!state.log.length) {
-    el.innerHTML = `
-      <div class="empty">
-        <div class="emoji">📊</div>
-        <p>Log some doses to see stats.</p>
-      </div>`;
+  if (!state.log.length && !state.vials.length) {
+    el.innerHTML = `<div class="empty"><div class="emoji">📊</div><p>Add vials and log doses to see stats.</p></div>`;
     return;
   }
 
@@ -1081,14 +1209,14 @@ function renderStats() {
     byPeptide[e.peptide].total += e.doseMcg;
   });
 
-  const today = new Date().toDateString();
-  const todayDoses = state.log.filter(e => new Date(e.ts).toDateString() === today);
-  const week = Date.now() - 7*86400000;
-  const weekDoses = state.log.filter(e => new Date(e.ts) >= week);
+  const today     = new Date().toDateString();
+  const todayLog  = state.log.filter(e => new Date(e.ts).toDateString() === today);
+  const weekLog   = state.log.filter(e => new Date(e.ts) >= new Date(Date.now() - 7*86400000));
+  const activeVials = state.vials.filter(v => !v.expired);
 
   el.innerHTML = `
+    <div class="section-title">Overview</div>
     <div class="card">
-      <div class="card-title">Overview</div>
       <div class="vial-stats">
         <div class="stat">
           <div class="stat-label">Total Doses</div>
@@ -1096,98 +1224,162 @@ function renderStats() {
         </div>
         <div class="stat">
           <div class="stat-label">Today</div>
-          <div class="stat-value">${todayDoses.length}</div>
+          <div class="stat-value">${todayLog.length}</div>
         </div>
         <div class="stat">
           <div class="stat-label">This Week</div>
-          <div class="stat-value">${weekDoses.length}</div>
+          <div class="stat-value">${weekLog.length}</div>
         </div>
       </div>
     </div>
 
+    ${Object.keys(byPeptide).length ? `
     <div class="section-title">By Peptide</div>
     ${Object.entries(byPeptide).map(([name, d]) => `
-      <div class="card" style="margin-bottom:10px">
+      <div class="card" style="margin-bottom:8px">
         <div style="display:flex; justify-content:space-between; align-items:center">
           <div>
             <div style="font-weight:700">${name}</div>
-            <div style="font-size:.78rem; color:var(--muted); margin-top:2px">${d.count} dose${d.count!==1?'s':''}</div>
+            <div style="font-size:.75rem; color:var(--muted); margin-top:1px">${d.count} dose${d.count!==1?'s':''}</div>
           </div>
           <div style="text-align:right">
             <div style="font-weight:700; color:var(--accent2)">${fmt(d.total,0)} mcg</div>
-            <div style="font-size:.75rem; color:var(--muted)">total delivered</div>
+            <div style="font-size:.72rem; color:var(--muted)">total delivered</div>
           </div>
         </div>
-      </div>
-    `).join('')}
+      </div>`).join('')}` : ''}
 
-    <div class="section-title">Active Vials</div>
-    ${state.vials.map(v => {
-      const rem = remainingMcg(v);
-      const p   = pct(v);
-      const pc  = progressClass(p);
+    ${activeVials.length ? `
+    <div class="section-title">Active Vial Status</div>
+    ${activeVials.map(v => {
+      const rem  = remainingMcg(v);
+      const p    = pct(v);
+      const pc   = progressClass(p);
+      const days = getDaysRemaining(v);
+      const end  = getEndDate(v);
       return `
-      <div class="card" style="margin-bottom:10px">
-        <div style="font-weight:700; margin-bottom:8px">${v.name}</div>
+      <div class="card" style="margin-bottom:8px">
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px">
+          <div style="font-weight:700">${v.name}</div>
+          ${end ? `<div style="font-size:.75rem; color:var(--muted)">ends ${fmtDate(end,{day:'numeric',month:'short'})}</div>` : ''}
+        </div>
         <div class="progress-wrap">
           <div class="progress-label">
             <span>${fmt(rem,0)} mcg remaining</span>
-            <span>${fmt(p,0)}%</span>
+            <span>${fmt(p,0)}%${days !== null ? ` · ~${days}d` : ''}</span>
           </div>
           <div class="progress-bar">
-            <div class="progress-fill ${pc}" style="width:${p}%"></div>
+            <div class="progress-fill ${pc}" style="width:${Math.min(p,100)}%"></div>
           </div>
         </div>
-        <div style="font-size:.75rem; color:var(--muted)">
-          ${fmt(concOf(v),0)} mcg/mL concentration
-        </div>
+        <div style="font-size:.72rem; color:var(--muted)">${fmt(concOf(v),0)} mcg/mL concentration</div>
       </div>`;
-    }).join('')}
+    }).join('')}` : ''}
+
+    ${state.vials.filter(v => v.expired).length ? `
+    <div class="section-title">Archived</div>
+    <div class="card">
+      <div style="color:var(--muted); font-size:.85rem; text-align:center">
+        ${state.vials.filter(v => v.expired).length} expired vial${state.vials.filter(v=>v.expired).length!==1?'s':''} archived
+      </div>
+    </div>` : ''}
   `;
 }
 
-// ── CSV Export ─────────────────────────────────────────────────
+/* ════════════════════════════════════════════════════════════
+   CSV EXPORT
+════════════════════════════════════════════════════════════ */
 function exportCSV() {
   const rows = [['Date','Time','Peptide','Dose (mcg)','Volume (mL)','Units','Notes']];
   state.log.forEach(e => {
     const d = new Date(e.ts);
     rows.push([
       d.toLocaleDateString('en-AU'),
-      d.toLocaleTimeString('en-AU', {hour:'2-digit', minute:'2-digit'}),
-      e.peptide,
-      fmt(e.doseMcg, 2),
-      e.doseML.toFixed(3),
-      fmt(e.units, 2),
-      e.notes || ''
+      d.toLocaleTimeString('en-AU',{hour:'2-digit',minute:'2-digit'}),
+      e.peptide, fmt(e.doseMcg,2), e.doseML.toFixed(3), fmt(e.units,2), e.notes||''
     ]);
   });
   const csv  = rows.map(r => r.map(c => `"${c}"`).join(',')).join('\n');
   const blob = new Blob([csv], {type:'text/csv'});
   const url  = URL.createObjectURL(blob);
   const a    = document.createElement('a');
-  a.href     = url;
-  a.download = `peptide-log-${new Date().toISOString().split('T')[0]}.csv`;
-  a.click();
-  URL.revokeObjectURL(url);
+  a.href = url; a.download = `peptide-log-${new Date().toISOString().split('T')[0]}.csv`;
+  a.click(); URL.revokeObjectURL(url);
   toast('📄 CSV exported');
 }
 
-// ── Toast ──────────────────────────────────────────────────────
-function toast(msg, ms=2400) {
+/* ════════════════════════════════════════════════════════════
+   NOTIFICATIONS
+════════════════════════════════════════════════════════════ */
+function updateNotifBtn() {
+  const btn = document.getElementById('notif-btn');
+  if (!('Notification' in window)) { btn.style.display = 'none'; return; }
+  if (Notification.permission === 'granted') {
+    btn.textContent = '🔔'; btn.classList.add('on'); btn.title = 'Notifications ON';
+  } else {
+    btn.textContent = '🔕'; btn.classList.remove('on'); btn.title = 'Tap to enable reminders';
+  }
+}
+
+async function handleNotifBtn() {
+  if (!('Notification' in window)) return toast('⚠️ Notifications not supported on this device');
+  if (Notification.permission === 'granted') {
+    checkNotifications();
+    return toast('🔔 Notifications are on — checking now…');
+  }
+  if (Notification.permission === 'denied')
+    return toast('🔕 Notifications blocked — please enable in device settings');
+  const p = await Notification.requestPermission();
+  updateNotifBtn();
+  if (p === 'granted') { toast('🔔 Notifications enabled!'); checkNotifications(); }
+  else toast('🔕 Notifications declined');
+}
+
+function checkNotifications() {
+  if (!('Notification' in window) || Notification.permission !== 'granted') return;
+  const today = new Date().toDateString();
+  let changed = false;
+
+  state.vials.filter(v => !v.expired).forEach(v => {
+    const days = getDaysRemaining(v);
+    // Fire notification if ≤7 days remaining and not yet notified today
+    if (days !== null && days >= 0 && days <= 7 && v.lastNotifiedDate !== today) {
+      try {
+        new Notification('⚠️ PepTrack: Low Supply', {
+          body: days === 0
+            ? `${v.name} is depleted — time to restock!`
+            : `${v.name} has ~${days} day${days!==1?'s':''} of supply remaining`,
+          icon:  './icon-192.png',
+          badge: './icon-192.png',
+          tag:   `peptrack-low-${v.id}`
+        });
+        v.lastNotifiedDate = today;
+        changed = true;
+      } catch(e) {}
+    }
+  });
+
+  if (changed) save();
+}
+
+/* ════════════════════════════════════════════════════════════
+   TOAST
+════════════════════════════════════════════════════════════ */
+function toast(msg, ms=2600) {
   const el = document.getElementById('toast');
-  el.textContent = msg;
-  el.classList.add('show');
+  el.textContent = msg; el.classList.add('show');
   setTimeout(() => el.classList.remove('show'), ms);
 }
 
-// ── PWA install ────────────────────────────────────────────────
+/* ════════════════════════════════════════════════════════════
+   PWA INSTALL
+════════════════════════════════════════════════════════════ */
 let installEvent = null;
 
 window.addEventListener('beforeinstallprompt', e => {
   e.preventDefault();
   installEvent = e;
-  const banner = document.getElementById('install-banner');
-  banner.classList.add('show');
+  document.getElementById('install-banner').classList.add('show');
 });
 
 document.getElementById('install-btn').addEventListener('click', () => {
@@ -1200,16 +1392,23 @@ document.getElementById('install-btn').addEventListener('click', () => {
   }
 });
 
-// ── Service worker ─────────────────────────────────────────────
+/* ════════════════════════════════════════════════════════════
+   SERVICE WORKER
+════════════════════════════════════════════════════════════ */
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('./sw.js').catch(() => {});
 }
 
-// ── Init ───────────────────────────────────────────────────────
+/* ════════════════════════════════════════════════════════════
+   INIT
+════════════════════════════════════════════════════════════ */
 load();
 setDateHeader();
+attachPreviewListeners();
 renderVials();
 updateFilterOptions();
+updateNotifBtn();
+checkNotifications();
 </script>
 </body>
 </html>
