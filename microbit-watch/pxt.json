@@ -1,0 +1,13 @@
+{
+    "name": "microbit-watch",
+    "description": "A watch program that displays the time of day (hours, minutes, seconds)",
+    "dependencies": {
+        "device": "*"
+    },
+    "files": [
+        "main.ts"
+    ],
+    "targetVersions": {
+        "target": "3.x.x"
+    }
+}
