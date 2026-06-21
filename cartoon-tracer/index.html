@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="CartTrace" />
+  <meta name="theme-color" content="#f59e0b" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="apple-touch-icon" href="icon-192.png" />
+  <title>Cartoon Tracer</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:       #0f172a;
+      --surface:  #1e293b;
+      --surface2: #273449;
+      --border:   #334155;
+      --accent:   #f59e0b;
+      --accent2:  #fbbf24;
+      --text:     #f1f5f9;
+      --muted:    #94a3b8;
+      --radius:   14px;
+      --safe-b:   env(safe-area-inset-bottom, 0px);
+      --safe-t:   env(safe-area-inset-top, 0px);
+    }
+
+    html, body {
+      height: 100%;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #000;
+      color: var(--text);
+      overscroll-behavior: none;
+      overflow: hidden;
+    }
+
+    /* ── App shell: fixed full-screen ── */
+    #app {
+      position: fixed;
+      inset: 0;
+      overflow: hidden;
+    }
+
+    /* ── Camera feed ── */
+    #cam {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      background: #000;
+    }
+
+    /* ── Overlay capture area: covers full screen, handles touch ── */
+    #overlay-wrap {
+      position: absolute;
+      inset: 0;
+      touch-action: none;
+      z-index: 1;
+    }
+
+    /* ── The cartoon image overlay ── */
+    #overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      pointer-events: none;
+      display: none;
+      transform-origin: center center;
+    }
+
+    /* ── Hint shown before any image is loaded ── */
+    #hint {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      z-index: 2;
+      pointer-events: none;
+      padding: 40px;
+    }
+
+    #hint .hint-icon {
+      font-size: 64px;
+      line-height: 1;
+      opacity: 0.6;
+    }
+
+    #hint .hint-title {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--text);
+      text-align: center;
+      opacity: 0.85;
+    }
+
+    #hint .hint-sub {
+      font-size: 15px;
+      color: var(--muted);
+      text-align: center;
+      max-width: 260px;
+      line-height: 1.5;
+    }
+
+    /* ── Bottom control bar ── */
+    #ctrl-bar {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 10;
+      background: rgba(15, 23, 42, 0.88);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      padding: 12px 16px;
+      padding-bottom: calc(12px + var(--safe-b));
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .ctrl-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    /* ── Buttons ── */
+    .btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      height: 42px;
+      padding: 0 14px;
+      border-radius: var(--radius);
+      border: 1.5px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+      user-select: none;
+      transition: background 0.15s, border-color 0.15s;
+    }
+
+    .btn:active { background: var(--surface2); }
+
+    .btn.accent {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #000;
+    }
+
+    .btn.accent:active { background: var(--accent2); }
+
+    .btn.active {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    /* ── Opacity / scale row ── */
+    .slider-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex: 1;
+      min-width: 0;
+    }
+
+    .slider-label {
+      font-size: 12px;
+      color: var(--muted);
+      white-space: nowrap;
+      min-width: 26px;
+      text-align: right;
+    }
+
+    input[type=range] {
+      -webkit-appearance: none;
+      appearance: none;
+      flex: 1;
+      height: 4px;
+      background: var(--border);
+      border-radius: 99px;
+      outline: none;
+      cursor: pointer;
+      touch-action: manipulation;
+    }
+
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 22px;
+      height: 22px;
+      background: var(--accent);
+      border-radius: 50%;
+      cursor: pointer;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.5);
+    }
+
+    input[type=range]::-moz-range-thumb {
+      width: 22px;
+      height: 22px;
+      background: var(--accent);
+      border-radius: 50%;
+      border: none;
+      cursor: pointer;
+    }
+
+    .slider-val {
+      font-size: 12px;
+      color: var(--muted);
+      min-width: 32px;
+      text-align: left;
+    }
+
+    /* ── Toast ── */
+    #toast {
+      position: absolute;
+      top: calc(var(--safe-t) + 16px);
+      left: 50%;
+      transform: translateX(-50%) translateY(-80px);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-size: 14px;
+      padding: 10px 20px;
+      border-radius: 99px;
+      z-index: 20;
+      pointer-events: none;
+      white-space: nowrap;
+      transition: transform 0.25s ease, opacity 0.25s ease;
+      opacity: 0;
+      max-width: calc(100vw - 32px);
+      text-align: center;
+    }
+
+    #toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+
+    /* ── Camera error state ── */
+    #cam-error {
+      position: absolute;
+      inset: 0;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      z-index: 5;
+      padding: 40px;
+      background: var(--bg);
+    }
+
+    #cam-error.show { display: flex; }
+
+    #cam-error p {
+      text-align: center;
+      line-height: 1.5;
+      color: var(--muted);
+      font-size: 15px;
+    }
+
+    #cam-error strong {
+      color: var(--text);
+      display: block;
+      font-size: 18px;
+      margin-bottom: 4px;
+    }
+
+    /* ── Loading spinner for camera ── */
+    #cam-loading {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 4;
+      background: #000;
+    }
+
+    #cam-loading.hidden { display: none; }
+
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+<div id="app">
+
+  <!-- Camera feed -->
+  <video id="cam" autoplay playsinline muted webkit-playsinline></video>
+
+  <!-- Camera loading state -->
+  <div id="cam-loading">
+    <div class="spinner"></div>
+  </div>
+
+  <!-- Camera error state -->
+  <div id="cam-error">
+    <div style="font-size:48px">📷</div>
+    <p><strong>Camera unavailable</strong>
+      Please allow camera access.<br>
+      On iPhone: Settings &gt; Safari &gt; Camera &gt; Allow
+    </p>
+    <button class="btn accent" id="retry-btn">Try Again</button>
+  </div>
+
+  <!-- Gesture + overlay area -->
+  <div id="overlay-wrap">
+    <img id="overlay" alt="" />
+  </div>
+
+  <!-- Hint shown before image upload -->
+  <div id="hint">
+    <div class="hint-icon">🖼️</div>
+    <div class="hint-title">Cartoon Tracer</div>
+    <div class="hint-sub">Upload a cartoon image and overlay it on your camera to trace onto paper</div>
+  </div>
+
+  <!-- Toast notification -->
+  <div id="toast"></div>
+
+  <!-- Control bar -->
+  <div id="ctrl-bar">
+    <!-- Row 1: upload + flip + reset -->
+    <div class="ctrl-row">
+      <button class="btn accent" id="upload-btn">Upload Image</button>
+      <button class="btn" id="flip-btn" title="Flip horizontally">Flip</button>
+      <button class="btn" id="reset-btn" title="Reset position, scale and rotation">Reset</button>
+    </div>
+    <!-- Row 2: opacity -->
+    <div class="ctrl-row">
+      <span class="slider-label">Opacity</span>
+      <div class="slider-group">
+        <input type="range" id="opacity-slider" min="0" max="100" value="50" />
+      </div>
+      <span class="slider-val" id="opacity-val">50%</span>
+    </div>
+  </div>
+
+  <!-- Hidden file input -->
+  <input type="file" id="file-input" accept="image/*" style="display:none" />
+</div>
+
+<script>
+'use strict';
+
+/* ── State ─────────────────────────────────────────────────────────── */
+let ov = { x: 0, y: 0, scale: 1, rotation: 0, opacity: 50, flipX: false };
+const ptrs = new Map(); // pointerId → {x, y}
+let hasImage = false;
+let toastTimer = null;
+
+/* ── Element refs ───────────────────────────────────────────────────── */
+const cam        = document.getElementById('cam');
+const camLoading = document.getElementById('cam-loading');
+const camError   = document.getElementById('cam-error');
+const wrap       = document.getElementById('overlay-wrap');
+const img        = document.getElementById('overlay');
+const hint       = document.getElementById('hint');
+const toast      = document.getElementById('toast');
+const fileInput  = document.getElementById('file-input');
+const uploadBtn  = document.getElementById('upload-btn');
+const flipBtn    = document.getElementById('flip-btn');
+const resetBtn   = document.getElementById('reset-btn');
+const opSlider   = document.getElementById('opacity-slider');
+const opVal      = document.getElementById('opacity-val');
+const retryBtn   = document.getElementById('retry-btn');
+
+/* ── Transform ──────────────────────────────────────────────────────── */
+function applyTransform() {
+  const flip = ov.flipX ? ' scaleX(-1)' : '';
+  img.style.transform =
+    `translate(${ov.x}px, ${ov.y}px) rotate(${ov.rotation}deg) scale(${ov.scale})${flip}`;
+  img.style.opacity = ov.opacity / 100;
+}
+
+function resetOverlay() {
+  ov.x = 0; ov.y = 0; ov.scale = 1; ov.rotation = 0;
+  ov.opacity = parseInt(opSlider.value, 10);
+  ov.flipX = false;
+  flipBtn.classList.remove('active');
+  applyTransform();
+}
+
+/* ── Gesture handling ───────────────────────────────────────────────── */
+wrap.addEventListener('pointerdown', e => {
+  if (!hasImage) return;
+  e.preventDefault();
+  wrap.setPointerCapture(e.pointerId);
+  ptrs.set(e.pointerId, { x: e.clientX, y: e.clientY });
+});
+
+wrap.addEventListener('pointermove', e => {
+  if (!hasImage || !ptrs.has(e.pointerId)) return;
+  e.preventDefault();
+
+  const prev = ptrs.get(e.pointerId);
+  const curr = { x: e.clientX, y: e.clientY };
+
+  if (ptrs.size === 1) {
+    ov.x += curr.x - prev.x;
+    ov.y += curr.y - prev.y;
+  } else if (ptrs.size === 2) {
+    const otherId = [...ptrs.keys()].find(id => id !== e.pointerId);
+    const other = ptrs.get(otherId);
+
+    const pv = { x: prev.x - other.x,  y: prev.y - other.y };
+    const cv = { x: curr.x  - other.x,  y: curr.y  - other.y };
+
+    const prevDist = Math.hypot(pv.x, pv.y);
+    const currDist = Math.hypot(cv.x, cv.y);
+    if (prevDist > 0) {
+      ov.scale = Math.max(0.05, Math.min(20, ov.scale * currDist / prevDist));
+    }
+
+    const prevAngle = Math.atan2(pv.y, pv.x) * 180 / Math.PI;
+    const currAngle = Math.atan2(cv.y, cv.x) * 180 / Math.PI;
+    ov.rotation += currAngle - prevAngle;
+  }
+
+  ptrs.set(e.pointerId, curr);
+  applyTransform();
+});
+
+window.addEventListener('pointerup',     e => ptrs.delete(e.pointerId));
+window.addEventListener('pointercancel', e => ptrs.delete(e.pointerId));
+
+/* Prevent iOS native pinch-zoom stealing the gesture */
+wrap.addEventListener('touchstart', e => { if (hasImage) e.preventDefault(); }, { passive: false });
+
+/* ── File upload ────────────────────────────────────────────────────── */
+uploadBtn.addEventListener('click', () => fileInput.click());
+
+fileInput.addEventListener('change', e => {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  const url = URL.createObjectURL(file);
+  img.onload = () => {
+    URL.revokeObjectURL(url);
+    hasImage = true;
+    img.style.display = 'block';
+    hint.style.display = 'none';
+    resetOverlay();
+    showToast('Image loaded — drag, pinch and rotate to position');
+  };
+  img.onerror = () => {
+    URL.revokeObjectURL(url);
+    showToast('Could not load image');
+  };
+  img.src = url;
+  fileInput.value = '';
+});
+
+/* ── Controls ───────────────────────────────────────────────────────── */
+flipBtn.addEventListener('click', () => {
+  if (!hasImage) return;
+  ov.flipX = !ov.flipX;
+  flipBtn.classList.toggle('active', ov.flipX);
+  applyTransform();
+});
+
+resetBtn.addEventListener('click', () => {
+  if (!hasImage) return;
+  resetOverlay();
+  showToast('Reset');
+});
+
+opSlider.addEventListener('input', () => {
+  ov.opacity = parseInt(opSlider.value, 10);
+  opVal.textContent = ov.opacity + '%';
+  applyTransform();
+});
+
+/* ── Toast ──────────────────────────────────────────────────────────── */
+function showToast(msg) {
+  toast.textContent = msg;
+  toast.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toast.classList.remove('show'), 2500);
+}
+
+/* ── Camera ─────────────────────────────────────────────────────────── */
+async function startCamera() {
+  camLoading.classList.remove('hidden');
+  camError.classList.remove('show');
+
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: { ideal: 'environment' } },
+      audio: false
+    });
+    cam.srcObject = stream;
+    await cam.play();
+    camLoading.classList.add('hidden');
+  } catch (err) {
+    camLoading.classList.add('hidden');
+    camError.classList.add('show');
+    console.error('Camera error:', err);
+  }
+}
+
+retryBtn.addEventListener('click', startCamera);
+
+/* ── PWA / service worker ───────────────────────────────────────────── */
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./sw.js').catch(() => {});
+}
+
+/* ── Init ───────────────────────────────────────────────────────────── */
+opVal.textContent = opSlider.value + '%';
+ov.opacity = parseInt(opSlider.value, 10);
+startCamera();
+</script>
+</body>
+</html>
